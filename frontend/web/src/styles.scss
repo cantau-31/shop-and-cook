@@ -1,1 +1,34 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600&display=swap');
+
+:root {
+  --sc-primary: #3b517a;
+  --sc-accent: #ffae00;
+}
+
+body {
+  font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f5f7fb;
+  color: #1f2a37;
+}
+
+a {
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--sc-primary);
+  border-color: var(--sc-primary);
+}
+
+.btn-outline-primary {
+  color: var(--sc-primary);
+  border-color: var(--sc-primary);
+}
+
+.text-primary {
+  color: var(--sc-primary) !important;
+}
+
+.text-warning {
+  color: var(--sc-accent) !important;
+}
