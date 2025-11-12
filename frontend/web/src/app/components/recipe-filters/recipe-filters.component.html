@@ -1,0 +1,52 @@
+<form
+  [formGroup]="filterForm"
+  class="row g-3 recipe-filters bg-white p-3 rounded shadow-sm"
+>
+  <div class="col-12 col-md-4">
+    <label class="form-label">Recherche</label>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Recette, ingrédient..."
+      formControlName="q"
+    />
+  </div>
+  <div class="col-12 col-sm-6 col-md-3">
+    <label class="form-label">Catégorie</label>
+    <select class="form-select" formControlName="category">
+      <option value="">Toutes</option>
+      @for (category of categories; track category) {
+      <option [value]="category">{{ category }}</option>
+      }
+    </select>
+  </div>
+  <div class="col-12 col-sm-6 col-md-3">
+    <label class="form-label">Difficulté</label>
+    <select class="form-select" formControlName="difficulty">
+      <option value="">Toutes</option>
+      @for (difficulty of difficulties; track difficulty.value) {
+      <option [value]="difficulty.value">
+        {{ difficulty.label }}
+      </option>
+      }
+    </select>
+  </div>
+  <div class="col-12 col-md-2">
+    <label class="form-label">Temps max (min)</label>
+    <input
+      type="number"
+      min="0"
+      class="form-control"
+      formControlName="maxTime"
+    />
+  </div>
+  <div class="col-12 d-flex justify-content-end">
+    <button
+      type="button"
+      class="btn btn-link text-decoration-none"
+      (click)="reset()"
+    >
+      Effacer les filtres
+    </button>
+  </div>
+</form>
