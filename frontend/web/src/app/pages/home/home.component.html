@@ -1,0 +1,68 @@
+<section class="hero-section text-center py-5">
+  <div class="container">
+    <p class="text-uppercase text-warning small mb-2">Shop & Cook</p>
+    <h1 class="display-5 fw-bold mb-3">
+      Toutes vos recettes préférées en un clic
+    </h1>
+    <p class="text-muted mb-4">
+      Rechercher, filtrer et sauvegarder vos plats favoris.
+    </p>
+  </div>
+</section>
+
+<section class="container mb-4">
+  <app-recipe-filters
+    [categories]="categories"
+    (filterChange)="onFiltersChange($event)"
+  ></app-recipe-filters>
+</section>
+
+<section class="container mb-5">
+  @if (error) {
+  <div class="alert alert-danger">{{ error }}</div>
+  } @if (loading) {
+  <app-loading-spinner></app-loading-spinner>
+  } @if (!loading) {
+  <div class="row g-4">
+    @for (recipe of recipes; track trackRecipe($index, recipe)) {
+    <div class="col-12 col-md-6 col-lg-4">
+      <app-recipe-card
+        [recipe]="recipe"
+        (view)="onViewRecipe($event)"
+        (favorite)="onToggleFavorite($event)"
+      ></app-recipe-card>
+    </div>
+    } @if (recipes && !recipes.length && !error) {
+    <p class="text-center text-muted">Aucune recette trouvée.</p>
+    }
+  </div>
+  } @if (totalPages > 1) {
+  <nav class="d-flex justify-content-center mt-4">
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="page === 1">
+        <button
+          class="page-link"
+          (click)="changePage(page - 1)"
+          [disabled]="page === 1"
+        >
+          Précédent
+        </button>
+      </li>
+      @for (p of pages; track p) {
+      <li class="page-item" [class.active]="p === page">
+        <button class="page-link" (click)="changePage(p)">{{ p }}</button>
+      </li>
+      }
+      <li class="page-item" [class.disabled]="page === totalPages">
+        <button
+          class="page-link"
+          (click)="changePage(page + 1)"
+          [disabled]="page === totalPages"
+        >
+          Suivant
+        </button>
+      </li>
+    </ul>
+  </nav>
+  }
+</section>
