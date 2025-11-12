@@ -1,0 +1,13 @@
+.navbar {
+  background: #3b517a;
+  .navbar-brand,
+  .nav-link,
+  .btn {
+    color: #fff;
+  }
+
+  .nav-link.active {
+    font-weight: 600;
+    color: #ffae00;
+  }
+}
