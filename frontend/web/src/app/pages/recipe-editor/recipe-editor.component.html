@@ -1,0 +1,160 @@
+<div class="container py-4">
+  <h2 class="mb-4">
+    {{ recipeId ? "Modifier la recette" : "Créer une recette" }}
+  </h2>
+
+  <form [formGroup]="recipeForm" (ngSubmit)="submit()" class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Informations générales</h5>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Titre</label>
+              <input type="text" class="form-control" formControlName="title" />
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Catégorie</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="category"
+              />
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Durée (min)</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="durationMinutes"
+              />
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Difficulté</label>
+              <select class="form-select" formControlName="difficulty">
+                @for (difficulty of difficulties; track difficulty.value) {
+                <option [value]="difficulty.value">
+                  {{ difficulty.label }}
+                </option>
+                }
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Image (URL)</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="imageUrl"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea
+                rows="3"
+                class="form-control"
+                formControlName="description"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Étapes</h5>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              (click)="addStep()"
+            >
+              Ajouter
+            </button>
+          </div>
+
+          @for (step of steps.controls; track $index) {
+          <div class="step-item mb-3">
+            <label class="form-label">Étape {{ $index + 1 }}</label>
+            <div class="d-flex gap-2">
+              <textarea
+                rows="2"
+                class="form-control"
+                [formControl]="step"
+              ></textarea>
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                (click)="removeStep($index)"
+                [disabled]="steps.length === 1"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Ingrédients</h5>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              (click)="addIngredient()"
+            >
+              Ajouter
+            </button>
+          </div>
+          @for (ingredient of ingredients.controls; track $index) {
+          <div [formGroup]="ingredient" class="ingredient-item mb-3">
+            <label class="form-label">Ingrédient {{ $index + 1 }}</label>
+            <input
+              type="text"
+              class="form-control mb-2"
+              formControlName="name"
+              placeholder="Nom"
+            />
+            <div class="d-flex gap-2">
+              <input
+                type="number"
+                class="form-control"
+                formControlName="quantity"
+                placeholder="Quantité"
+              />
+              <input
+                type="text"
+                class="form-control"
+                formControlName="unit"
+                placeholder="Unité"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                (click)="removeIngredient($index)"
+                [disabled]="ingredients.length === 1"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg"
+          [disabled]="recipeForm.invalid || isSaving"
+        >
+          {{ isSaving ? "Enregistrement..." : "Enregistrer" }}
+        </button>
+        <a routerLink="/" class="btn btn-outline-secondary">Annuler</a>
+      </div>
+    </div>
+  </form>
+</div>
