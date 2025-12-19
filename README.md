@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-# shop-and-cook
-Application web de recettes (Angular + NestJS + MySQL)
-=======
 # Shop & Cook
->>>>>>> 9519823 (Ajout du projet NestJS)
 Parfait 🔥 on va faire ça proprement, étape par étape — tu vas avoir un **dépôt GitHub pro**, prêt à héberger ton projet *Shop & Cook (Angular + NestJS + MySQL)*.
-
-# Shop & Cook
 
 **Shop & Cook** est une application web full-stack permettant de créer, consulter et partager des recettes de cuisine.
 Chaque recette contient des ingrédients structurés (quantité + unité), des étapes, une durée, une difficulté, et peut être notée/commentée par les utilisateurs.
@@ -31,7 +24,6 @@ Chaque recette contient des ingrédients structurés (quantité + unité), des �
 shop-and-cook/
 ├── frontend/ → Angular app
 ├── backend/  → NestJS API
-├── mock-front/ → Démo Angular autonome (fake API)
 ├── sql/      → Scripts SQL (BDD + seeds)
 ├── docs/     → Maquettes, cahier des charges, UML
 └── README.md
@@ -60,14 +52,6 @@ npm run start:dev
 
 ```bash
 cd ../frontend
-npm install
-npm start
-```
-
-### Mini front autonome (fake API)
-
-```bash
-cd mock-front
 npm install
 npm start
 ```

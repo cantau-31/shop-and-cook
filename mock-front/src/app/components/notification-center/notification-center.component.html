@@ -1,8 +1,0 @@
-<div class="notification-center">
-  @for (notification of notifications; track trackById($index, notification)) {
-  <div class="toast-item" [class.success]="notification.level === 'success'" [class.error]="notification.level === 'error'">
-    <span>{{ notification.message }}</span>
-    <button type="button" aria-label="Fermer" (click)="dismiss(notification.id)">×</button>
-  </div>
-  }
-</div>
