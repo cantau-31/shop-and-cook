@@ -1,98 +1,131 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Shop & Cook API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend NestJS pour l’application Shop & Cook. Il expose une API REST documentée (Swagger) alimentée par MySQL + TypeORM, avec authentification JWT (access + refresh), validation forte et règles métier dédiées aux recettes, ingrédients, commentaires, notes et favoris.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Stack & caractéristiques
 
-## Description
+- NestJS 11 + TypeScript
+- TypeORM (MySQL)
+- Authentification JWT (access 15 min / refresh 7 j)
+- class-validator / class-transformer & ValidationPipe globale
+- Swagger disponible sur `/docs`
+- Guards JWT, rôles (USER/ADMIN) et auteur-ou-admin
+- Rate limiting sur `/auth/*` et `/comments/*`
+- Gestion des erreurs homogène `{ code, message, details? }`
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## 📦 Installation
 
 ```bash
-$ npm install
+cd backend/api
+cp .env.example .env            # ajuster les variables d’environnement
+npm install
 ```
 
-## Compile and run the project
+Variables importantes (`.env`):
+
+```
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASS=
+DB_NAME=shopcook
+JWT_SECRET=supersecret
+JWT_EXPIRES_IN=15m
+REFRESH_SECRET=anothersecret
+REFRESH_EXPIRES_IN=7d
+FRONTEND_ORIGIN=http://localhost:4200
+```
+
+### Base de données
+
+Créer la base MySQL `shopcook` (ou celle déclarée dans `.env`) puis exécuter les migrations / scripts nécessaires. Un script de seed rapide est fourni :
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run seed
 ```
 
-## Run tests
+Il crée :
+- 1 admin (`admin@shopcook.dev / Admin123!`)
+- 1 utilisateur de démonstration (`demo@shopcook.dev / Demo123!`)
+- 3 catégories
+- 1 recette + ingrédients associés
 
-```bash
-# unit tests
-$ npm run test
+## 🏃 Scripts npm
 
-# e2e tests
-$ npm run test:e2e
+| Commande | Description |
+| --- | --- |
+| `npm run start:dev` | Démarre l’API en mode watch |
+| `npm run start` | Démarre en mode production |
+| `npm run build` | Compile TypeScript -> dist |
+| `npm run lint` | ESLint + fix |
+| `npm run test` | Tests unitaires (Jest) |
+| `npm run test:e2e` | Tests end-to-end |
+| `npm run seed` | Script de pré-chargement de données |
 
-# test coverage
-$ npm run test:cov
+## 🧭 Routes principales
+
+Toutes les réponses d’erreurs suivent `{ code, message, details? }`.
+
+### Auth (`/auth`)
+- `POST /auth/register` – inscription (hash bcrypt)
+- `POST /auth/login` – retourne `{ accessToken, refreshToken }`
+- `POST /auth/refresh` – refresh token Bearer
+- `POST /auth/logout` – invalide côté client (stateless)
+
+### Utilisateur
+- `GET /me` (JWT) – profil courant
+
+### Recettes (`/recipes`)
+- `GET /recipes?q=&category=&difficulty=&maxTime=&page=&limit=` – liste paginée
+- `GET /recipes/:idOrSlug` – détails
+- `POST /recipes` (USER) – crée une recette avec ingrédients
+- `PUT /recipes/:id` (auteur/ADMIN) – met à jour recette + steps
+- `PUT /recipes/:id/ingredients` (auteur/ADMIN) – remplace les ingrédients
+- `PATCH /recipes/admin/:id/hide` (ADMIN) – soft delete via `hiddenAt`
+
+### Ingrédients / catégories
+- `GET /categories` – liste des catégories (utilisé par le front)
+
+### Notes & commentaires
+- `POST /recipes/:id/rating` (USER) – 1 note par user/recette, renvoie la moyenne
+- `GET /recipes/:id/comments` – liste paginée publique
+- `POST /recipes/:id/comments` (USER) – création
+- `DELETE /comments/:id` (auteur <10 min ou ADMIN)
+
+### Favoris
+- `POST /recipes/:id/favorite` (USER)
+- `DELETE /recipes/:id/favorite` (USER)
+- `GET /me/favorites` (USER)
+
+## ✅ Tests & vérifications
+
+- **Unitaires** : services clés (`ratings.service.spec.ts` …). Ajoutez vos propres scenarii métier à mesure que le domaine grandit.
+- **E2E** : `test/app.e2e-spec.ts` illustre le chemin happy-path (inscription → login → création de recette → récupération).
+
+> 💡 Les tests nécessitent une base dédiée (ex. MySQL docker) ou un override TypeORM (SQLite). Configurez vos variables `.env.test` avant d’exécuter `npm run test:e2e`.
+
+## 🔐 Sécurité & bonnes pratiques intégrées
+
+- Hash BCrypt (salt 11 par défaut) + DTOs validés
+- Guards JWT + Roles + AuthorOrAdmin
+- Rate limiting via `@nestjs/throttler`
+- CORS configurable (`FRONTEND_ORIGIN`)
+- Swagger documenté avec bearerAuth
+- Logger minimal sans fuite PII
+
+## 📚 Swagger / docs
+
+Après démarrage (`npm run start:dev`), la documentation est disponible sur :
+
+```
+http://localhost:3000/docs
 ```
 
-## Deployment
+## 🤝 Contribution
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+1. `npm install`
+2. Créer une branche
+3. Ajouter vos tests (`npm run test`)
+4. Soumettre une PR détaillée
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Bon développement sur Shop & Cook ! 🍳
