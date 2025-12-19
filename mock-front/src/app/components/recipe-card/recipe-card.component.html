@@ -1,0 +1,52 @@
+<div class="card recipe-card h-100 shadow-sm">
+  <div class="card-img-wrapper">
+    <img [src]="recipe.imageUrl" class="card-img-top" [alt]="recipe.title" />
+    <div class="floating-actions">
+      <span class="rating-badge">
+        ★ {{ recipe.rating | number : "1.1-1" }}
+      </span>
+      <button
+        type="button"
+        class="favorite-btn"
+        (click)="favorite.emit(recipe.id)"
+        aria-label="Ajouter aux favoris"
+        [attr.aria-pressed]="recipe.isFavorite"
+      >
+        @if (recipe.isFavorite) {
+        <span>★</span>
+        } @else {
+        <span>☆</span>
+        }
+        <span class="visually-hidden">
+          @if (recipe.isFavorite) {
+          Retirer des favoris
+          } @else {
+          Ajouter aux favoris
+          }
+        </span>
+      </button>
+    </div>
+  </div>
+  <div class="card-body d-flex flex-column">
+    <div class="card-title-row">
+      <h5 class="card-title mb-0">{{ recipe.title }}</h5>
+    </div>
+    <p class="text-muted small mb-3">
+      {{ recipe.category }} &middot; {{ recipe.durationMinutes }} min &middot;
+      {{ recipe.difficulty | difficultyLabel }}
+    </p>
+    <div class="recipe-meta mb-3">
+      <span class="meta-chip">{{ recipe.category }}</span>
+      <span class="meta-chip">{{ recipe.durationMinutes }} min</span>
+      <span class="meta-chip">{{ recipe.difficulty | difficultyLabel }}</span>
+    </div>
+    <div class="mt-auto">
+      <button
+        class="btn btn-primary btn-sm w-100"
+        (click)="view.emit(recipe.id)"
+      >
+        Voir la recette
+      </button>
+    </div>
+  </div>
+</div>

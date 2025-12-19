@@ -1,0 +1,59 @@
+<form
+  [formGroup]="filterForm"
+  class="row g-4 recipe-filters glass-panel p-4"
+>
+  <div
+    class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 filters-header"
+  >
+    <div>
+      <p class="eyebrow mb-1">Affinez votre recherche</p>
+      <h2 class="h5 mb-0">Filtrez par goût, temps ou niveau</h2>
+    </div>
+    <button
+      type="button"
+      class="btn btn-link p-0 text-decoration-none reset-link"
+      (click)="reset()"
+    >
+      Effacer les filtres
+    </button>
+  </div>
+  <div class="col-12 col-md-4">
+    <label class="form-label">Recherche</label>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Recette, ingrédient..."
+      formControlName="q"
+    />
+  </div>
+  <div class="col-12 col-sm-6 col-md-3">
+    <label class="form-label">Catégorie</label>
+    <select class="form-select" formControlName="category">
+      <option value="">Toutes</option>
+      @for (category of categories; track category.id) {
+      <option [value]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="col-12 col-sm-6 col-md-3">
+    <label class="form-label">Difficulté</label>
+    <select class="form-select" formControlName="difficulty">
+      <option value="">Toutes</option>
+      @for (difficulty of difficulties; track difficulty.value) {
+      <option [value]="difficulty.value">
+        {{ difficulty.label }}
+      </option>
+      }
+    </select>
+  </div>
+  <div class="col-12 col-md-2">
+    <label class="form-label">Temps max (min)</label>
+    <input
+      type="number"
+      min="0"
+      class="form-control"
+      placeholder="Ex. 30"
+      formControlName="maxTime"
+    />
+  </div>
+</form>

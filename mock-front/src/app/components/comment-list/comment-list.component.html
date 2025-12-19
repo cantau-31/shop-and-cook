@@ -1,0 +1,25 @@
+<div class="comment-list mt-4">
+  <h6 class="mb-3">Commentaires</h6>
+  @if (!comments?.length) {
+  <p class="text-muted">Aucun commentaire pour l'instant.</p>
+  } @for (comment of comments; track trackComment($index, comment)) {
+  <div class="comment-item p-3 rounded mb-2">
+    <div class="d-flex justify-content-between align-items-center gap-3">
+      <div>
+        <strong>{{ comment.authorName || 'Utilisateur' }}</strong>
+        <small class="text-muted ms-2">{{ comment.createdAt | date : "short" }}</small>
+      </div>
+      @if (canDelete(comment)) {
+      <button
+        type="button"
+        class="btn btn-outline-danger btn-sm"
+        (click)="deleteRequested.emit(comment.id)"
+      >
+        Supprimer
+      </button>
+      }
+    </div>
+    <p class="mb-0 mt-2">{{ comment.message }}</p>
+  </div>
+  }
+</div>

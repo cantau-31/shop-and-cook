@@ -1,0 +1,40 @@
+import { Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
+import { AdminComponent } from './pages/admin/admin.component';
+import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
+import { LoginComponent } from './pages/auth/login/login.component';
+import { RegisterComponent } from './pages/auth/register/register.component';
+import { HomeComponent } from './pages/home/home.component';
+import { ProfileComponent } from './pages/profile/profile.component';
+import { RecipeDetailComponent } from './pages/recipe-detail/recipe-detail.component';
+import { RecipeEditorComponent } from './pages/recipe-editor/recipe-editor.component';
+
+export const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'recipe/:id', component: RecipeDetailComponent },
+  {
+    path: 'recipes/new',
+    component: RecipeEditorComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'recipes/:id/edit',
+    component: RecipeEditorComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN'] },
+  },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: '**', redirectTo: '' },
+];
