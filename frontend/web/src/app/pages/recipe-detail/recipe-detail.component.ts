@@ -1,22 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { TitleCasePipe, DecimalPipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DecimalPipe, NgClass } from '@angular/common';
 
 import { Comment } from '../../models/comment.model';
 import { Recipe } from '../../models/recipe.model';
+import { User } from '../../models/user.model';
 import { CommentService } from '../../services/comment.service';
 import { AuthService } from '../../services/auth.service';
 import { RecipeService } from '../../services/recipe.service';
+import { NotificationService } from '../../services/notification.service';
 import { CommentFormComponent } from '../../components/comment-form/comment-form.component';
 import { CommentListComponent } from '../../components/comment-list/comment-list.component';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
+import { DifficultyLabelPipe } from '../../pipes/difficulty-label.pipe';
 
 @Component({
   selector: 'app-recipe-detail',
   standalone: true,
   imports: [
-    TitleCasePipe,
     DecimalPipe,
+    NgClass,
+    DifficultyLabelPipe,
     CommentFormComponent,
     CommentListComponent,
     LoadingSpinnerComponent,
@@ -31,18 +35,23 @@ export class RecipeDetailComponent implements OnInit {
   error: string | null = null;
 
   isAuthenticated = false;
+  currentUser: User | null = null;
+  myRating: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private recipeService: RecipeService,
     private commentService: CommentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private notifications: NotificationService
   ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(
-      (user) => (this.isAuthenticated = !!user)
-    );
+    this.authService.currentUser$.subscribe((user) => {
+      this.currentUser = user;
+      this.isAuthenticated = !!user;
+    });
 
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
@@ -57,11 +66,19 @@ export class RecipeDetailComponent implements OnInit {
     if (!this.recipe) {
       return;
     }
+    if (!this.isAuthenticated) {
+      this.redirectToLogin();
+      return;
+    }
     this.recipeService.toggleFavorite(this.recipe.id).subscribe(() => {
+      const nextFavoriteState = !this.recipe?.isFavorite;
       this.recipe = {
         ...this.recipe!,
-        isFavorite: !this.recipe?.isFavorite,
+        isFavorite: nextFavoriteState,
       };
+      this.notifications.success(
+        nextFavoriteState ? 'Ajouté aux favoris' : 'Retiré des favoris'
+      );
     });
   }
 
@@ -69,16 +86,39 @@ export class RecipeDetailComponent implements OnInit {
     if (!this.recipe) {
       return;
     }
-    this.recipeService.rateRecipe(this.recipe.id, rating).subscribe(() => {
-      this.recipe = {
-        ...this.recipe!,
-        rating,
-      };
+    if (!this.isAuthenticated) {
+      this.redirectToLogin();
+      return;
+    }
+    this.recipeService.rateRecipe(this.recipe.id, rating).subscribe({
+      next: (result) => {
+        this.myRating = result.stars ?? rating;
+        this.recipe = {
+          ...this.recipe!,
+          rating: result.average ?? rating,
+        };
+        this.notifications.success('Merci pour votre note !');
+      }
     });
   }
 
   onCommentCreated(comment: Comment): void {
-    this.comments = [comment, ...this.comments];
+    const enriched = {
+      ...comment,
+      authorName: comment.authorName ?? this.currentUser?.displayName ?? 'Vous',
+      authorId: comment.authorId ?? this.currentUser?.id ?? '',
+    };
+    this.comments = [enriched, ...this.comments];
+    this.notifications.success('Commentaire publié');
+  }
+
+  onDeleteComment(commentId: string): void {
+    this.commentService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.comments = this.comments.filter((comment) => comment.id !== commentId);
+        this.notifications.success('Commentaire supprimé');
+      },
+    });
   }
 
   private loadRecipe(id: string): void {
@@ -101,5 +141,10 @@ export class RecipeDetailComponent implements OnInit {
     this.commentService.getComments(id).subscribe({
       next: (comments) => (this.comments = comments),
     });
+  }
+
+  private redirectToLogin(): void {
+    const redirectTo = this.recipe ? `/recipe/${this.recipe.id}` : this.router.url;
+    this.router.navigate(['/login'], { queryParams: { redirectTo } });
   }
 }

@@ -13,7 +13,9 @@
               <label class="form-label">Mot de passe</label>
               <input type="password" class="form-control" formControlName="password" />
             </div>
-            <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+            @if (error) {
+            <div class="alert alert-danger">{{ error }}</div>
+            }
             <div class="d-grid gap-2">
               <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting">
                 {{ isSubmitting ? 'Connexion...' : 'Se connecter' }}

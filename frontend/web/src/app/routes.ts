@@ -1,6 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-
+import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminComponent } from './pages/admin/admin.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
@@ -11,38 +9,32 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { RecipeDetailComponent } from './pages/recipe-detail/recipe-detail.component';
 import { RecipeEditorComponent } from './pages/recipe-editor/recipe-editor.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'recipe/:id', component: RecipeDetailComponent },
   {
     path: 'recipes/new',
     component: RecipeEditorComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   },
   {
     path: 'recipes/:id/edit',
     component: RecipeEditorComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   },
   {
     path: 'profile',
     component: ProfileComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
   },
   {
     path: 'admin',
     component: AdminComponent,
     canActivate: [AuthGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}

@@ -1,10 +1,9 @@
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'USER' | 'ADMIN';
 
 export interface User {
   id: string;
-  name: string;
+  displayName: string;
   email: string;
   role: UserRole;
   avatarUrl?: string;
-  favorites: string[];
 }

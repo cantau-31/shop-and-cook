@@ -1,6 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light app-navbar shadow-sm">
   <div class="container">
-    <a class="navbar-brand fw-bold" routerLink="/">Shop & Cook</a>
+    <a
+      class="navbar-brand d-flex align-items-center gap-2 fw-bold"
+      routerLink="/"
+    >
+      <span class="brand-badge">
+        <span class="badge-dot"></span>
+      </span>
+      <span class="brand-copy">
+        Shop & Cook
+        <small>Recettes inspirantes</small>
+      </span>
+    </a>
     <button
       class="navbar-toggler"
       type="button"
@@ -39,7 +50,7 @@
             >Profil</a
           >
         </li>
-        @if (user.role === 'admin') {
+        @if (user.role === 'ADMIN') {
         <li class="nav-item">
           <a
             class="nav-link"
@@ -51,22 +62,22 @@
         </li>
         } }
       </ul>
-      <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2 nav-actions">
         @if (user$ | async; as user) {
-        <span class="text-muted small">Bonjour, {{ user.name }}</span>
-        <button class="btn btn-outline-light" (click)="logout()">
+        <span class="text-muted small">Bonjour, {{ user.displayName }}</span>
+        <button class="btn btn-outline-primary" (click)="logout()">
           Déconnexion
         </button>
         } @else {
         <a
           routerLink="/login"
-          class="btn btn-outline-light me-2"
+          class="btn btn-outline-primary me-2"
           (click)="closeMenu()"
           >Connexion</a
         >
         <a
           routerLink="/register"
-          class="btn btn-warning text-dark"
+          class="btn btn-primary text-white"
           (click)="closeMenu()"
           >Inscription</a
         >

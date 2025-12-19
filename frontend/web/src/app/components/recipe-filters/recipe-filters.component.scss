@@ -1,6 +1,44 @@
 .recipe-filters {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+
   .form-label {
-    font-weight: 500;
-    color: #3b517a;
+    font-weight: 600;
+    color: var(--sc-heading);
+    font-size: 0.9rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 0.9rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    padding: 0.75rem 0.95rem;
+    background-color: rgba(15, 23, 42, 0.02);
+
+    &:focus {
+      border-color: var(--sc-primary);
+      box-shadow: 0 0 0 0.15rem rgba(62, 56, 242, 0.15);
+    }
+  }
+
+  .filters-header {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 0.7rem;
+      color: var(--sc-muted);
+      font-weight: 600;
+    }
+  }
+
+  .reset-link {
+    color: rgba(15, 23, 42, 0.6);
+
+    &:hover {
+      color: var(--sc-primary);
+    }
   }
 }

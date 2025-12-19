@@ -10,6 +10,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 
 import { RecipeQueryParams } from '../../models/recipe.model';
+import { Category } from '../../models/category.model';
 
 @Component({
   selector: 'app-recipe-filters',
@@ -19,7 +20,7 @@ import { RecipeQueryParams } from '../../models/recipe.model';
   styleUrls: ['./recipe-filters.component.scss'],
 })
 export class RecipeFiltersComponent implements OnInit, OnDestroy {
-  @Input() categories: string[] = [];
+  @Input() categories: Category[] = [];
   @Output() filterChange = new EventEmitter<RecipeQueryParams>();
 
   private destroy$ = new Subject<void>();

@@ -16,9 +16,9 @@ export class RegisterComponent {
   isSubmitting = false;
 
   form = this.fb.group({
-    name: ['', Validators.required],
+    displayName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   constructor(

@@ -60,8 +60,8 @@ export class AdminComponent implements OnInit {
     this.error = null;
     this.recipeService.getRecipes({ limit: 50, page: 1 }).subscribe({
       next: (response) => {
-        this.recipes = response.data;
-        this.comments = response.data.flatMap((recipe) =>
+        this.recipes = response.items;
+        this.comments = response.items.flatMap((recipe) =>
           (recipe.comments || []).map((comment) => ({
             ...comment,
             recipeTitle: recipe.title,

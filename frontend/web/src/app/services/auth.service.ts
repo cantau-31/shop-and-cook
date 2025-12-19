@@ -11,7 +11,7 @@ export interface LoginPayload {
 }
 
 export interface RegisterPayload extends LoginPayload {
-  name: string;
+  displayName: string;
 }
 
 interface AuthResponse {

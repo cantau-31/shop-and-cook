@@ -12,6 +12,8 @@ import { CommonModule } from '@angular/common';
 
 import { Recipe } from '../../models/recipe.model';
 import { RecipeService } from '../../services/recipe.service';
+import { Category } from '../../models/category.model';
+import { CategoryService } from '../../services/category.service';
 
 type IngredientFormGroup = FormGroup<{
   name: FormControl<string>;
@@ -22,6 +24,7 @@ type IngredientFormGroup = FormGroup<{
 type RecipeFormGroup = FormGroup<{
   title: FormControl<string>;
   category: FormControl<string>;
+  servings: FormControl<number>;
   durationMinutes: FormControl<number>;
   difficulty: FormControl<string>;
   imageUrl: FormControl<string>;
@@ -40,6 +43,7 @@ type RecipeFormGroup = FormGroup<{
 export class RecipeEditorComponent implements OnInit {
   recipeId: string | null = null;
   isSaving = false;
+  categories: Category[] = [];
   difficulties = [
     { label: 'Facile', value: 'easy' },
     { label: 'Moyenne', value: 'medium' },
@@ -48,7 +52,8 @@ export class RecipeEditorComponent implements OnInit {
 
   recipeForm: RecipeFormGroup = this.fb.nonNullable.group({
     title: ['', Validators.required],
-    category: ['', Validators.required],
+    category: [''],
+    servings: [2, [Validators.required, Validators.min(1)]],
     durationMinutes: [30, [Validators.required, Validators.min(1)]],
     difficulty: ['easy', Validators.required],
     imageUrl: ['', Validators.required],
@@ -63,11 +68,13 @@ export class RecipeEditorComponent implements OnInit {
     private fb: FormBuilder,
     private recipeService: RecipeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private categoryService: CategoryService
   ) {}
 
   ngOnInit(): void {
     this.recipeId = this.route.snapshot.paramMap.get('id');
+    this.loadCategories();
     if (this.recipeId) {
       this.loadRecipe(this.recipeId);
     }
@@ -138,13 +145,19 @@ export class RecipeEditorComponent implements OnInit {
   private loadRecipe(id: string): void {
     this.recipeService.getRecipeById(id).subscribe({
       next: (recipe) => {
+        const derivedDuration =
+          (recipe.durationMinutes ??
+            (Number(recipe.prepMinutes ?? 0) + Number(recipe.cookMinutes ?? 0))) ||
+          30;
+
         this.recipeForm.patchValue({
           title: recipe.title,
-          category: recipe.category,
-          durationMinutes: recipe.durationMinutes,
-          difficulty: recipe.difficulty,
-          imageUrl: recipe.imageUrl,
-          description: recipe.description,
+          category: recipe.categoryId?.toString() ?? '',
+          servings: recipe.servings ?? 2,
+          durationMinutes: derivedDuration,
+          difficulty: this.normalizeDifficulty(recipe.difficulty),
+          imageUrl: recipe.coverUrl ?? recipe.imageUrl ?? '',
+          description: recipe.description ?? '',
         });
 
         this.recipeForm.setControl(
@@ -175,16 +188,34 @@ export class RecipeEditorComponent implements OnInit {
     });
   }
 
+  private loadCategories(): void {
+    this.categoryService.list().subscribe({
+      next: (items) => (this.categories = items),
+      error: () => {
+        this.categories = [];
+      },
+    });
+  }
+
   private buildPayload(): Partial<Recipe> {
     const formValue = this.recipeForm.getRawValue();
+    const totalMinutes = Number(formValue.durationMinutes) || 0;
+    const prepMinutes = Math.max(Math.floor(totalMinutes / 2), 0);
+    const cookMinutes = Math.max(totalMinutes - prepMinutes, 0);
+    const categoryValue = (formValue.category ?? '').toString().trim();
+    const parsedCategory = categoryValue === '' ? undefined : Number(categoryValue);
+    const categoryIdNumber =
+      parsedCategory !== undefined && Number.isFinite(parsedCategory) ? parsedCategory : undefined;
 
     return {
       title: formValue.title,
-      category: formValue.category,
-      durationMinutes: formValue.durationMinutes,
-      difficulty: formValue.difficulty as Recipe['difficulty'],
-      imageUrl: formValue.imageUrl,
-      description: formValue.description,
+      categoryId: categoryIdNumber,
+      servings: Number(formValue.servings) || 1,
+      prepMinutes,
+      cookMinutes,
+      difficulty: this.difficultyToNumber(formValue.difficulty),
+      coverUrl: formValue.imageUrl || undefined,
+      isPublished: true,
       ingredients: formValue.ingredients.map((ingredient) => ({
         name: ingredient.name,
         quantity: Number(ingredient.quantity),
@@ -192,5 +223,27 @@ export class RecipeEditorComponent implements OnInit {
       })),
       steps: formValue.steps.filter((step) => !!step),
     };
+  }
+
+  private normalizeDifficulty(value: Recipe['difficulty']): string {
+    if (typeof value === 'number') {
+      if (value <= 2) return 'easy';
+      if (value >= 4) return 'hard';
+      return 'medium';
+    }
+    return value || 'easy';
+  }
+
+  private difficultyToNumber(value: string | number): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    const map: Record<string, number> = {
+      easy: 1,
+      medium: 3,
+      hard: 5,
+    };
+    const key = value.toLowerCase();
+    return map[key] ?? 1;
   }
 }

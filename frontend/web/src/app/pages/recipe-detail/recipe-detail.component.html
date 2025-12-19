@@ -14,7 +14,7 @@
       <p class="text-muted">{{ r.description }}</p>
       <div class="d-flex flex-wrap gap-3 my-3 text-muted">
         <span>Durée : {{ r.durationMinutes }} min</span>
-        <span>Difficulté : {{ r.difficulty | titlecase }}</span>
+        <span>Difficulté : {{ r.difficulty | difficultyLabel }}</span>
         <span>Note : ★ {{ r.rating | number : "1.1-1" }}</span>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -22,8 +22,16 @@
           {{ r.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris" }}
         </button>
         <div class="btn-group" role="group" aria-label="Noter la recette">
-          @for (rate of [3, 4, 5]; track rate) {
-          <button class="btn btn-outline-primary" (click)="rateRecipe(rate)">
+          @for (rate of [1, 2, 3, 4, 5]; track rate) {
+          <button
+            class="btn"
+            [ngClass]="
+              myRating && rate <= myRating
+                ? 'btn-warning text-dark'
+                : 'btn-outline-primary'
+            "
+            (click)="rateRecipe(rate)"
+          >
             {{ rate }} ★
           </button>
           }
@@ -69,7 +77,12 @@
         Connecte-toi pour laisser un commentaire.
       </div>
       }
-      <app-comment-list [comments]="comments"></app-comment-list>
+      <app-comment-list
+        [comments]="comments"
+        [currentUserId]="currentUser?.id"
+        [isAdmin]="currentUser?.role === 'ADMIN'"
+        (deleteRequested)="onDeleteComment($event)"
+      ></app-comment-list>
     </div>
   </div>
 </section>

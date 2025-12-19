@@ -15,11 +15,16 @@
             </div>
             <div class="col-12 col-md-6">
               <label class="form-label">Catégorie</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="category"
-              />
+              <select class="form-select" formControlName="category">
+                <option value="">Sans catégorie</option>
+                @for (category of categories; track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label">Portions</label>
+              <input type="number" class="form-control" formControlName="servings" />
             </div>
             <div class="col-6 col-md-3">
               <label class="form-label">Durée (min)</label>

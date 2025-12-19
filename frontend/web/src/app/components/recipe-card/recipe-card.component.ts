@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DecimalPipe, TitleCasePipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 
 import { Recipe } from '../../models/recipe.model';
+import { DifficultyLabelPipe } from '../../pipes/difficulty-label.pipe';
 
 @Component({
   selector: 'app-recipe-card',
   standalone: true,
-  imports: [DecimalPipe, TitleCasePipe],
+  imports: [DecimalPipe, DifficultyLabelPipe],
   templateUrl: './recipe-card.component.html',
   styleUrls: ['./recipe-card.component.scss'],
 })

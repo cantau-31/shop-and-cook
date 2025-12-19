@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
 import { Comment } from '../../models/comment.model';
@@ -12,4 +12,21 @@ import { Comment } from '../../models/comment.model';
 })
 export class CommentListComponent {
   @Input() comments: Comment[] | null = [];
+  @Input() currentUserId?: string | null;
+  @Input() isAdmin = false;
+  @Output() deleteRequested = new EventEmitter<string>();
+
+  canDelete(comment: Comment) {
+    if (!comment.id) {
+      return false;
+    }
+    if (this.isAdmin) {
+      return true;
+    }
+    return this.currentUserId != null && comment.authorId === this.currentUserId;
+  }
+
+  trackComment(_index: number, comment: Comment) {
+    return comment.id;
+  }
 }

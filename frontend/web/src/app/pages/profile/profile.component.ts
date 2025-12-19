@@ -7,11 +7,13 @@ import { Recipe } from '../../models/recipe.model';
 import { User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import { RecipeService } from '../../services/recipe.service';
+import { NotificationService } from '../../services/notification.service';
+import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LoadingSpinnerComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
@@ -24,7 +26,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private recipeService: RecipeService
+    private recipeService: RecipeService,
+    private notifications: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -48,11 +51,32 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  removeFavorite(recipeId: string): void {
+    this.recipeService.toggleFavorite(recipeId).subscribe({
+      next: () => {
+        this.favorites = this.favorites.filter((recipe) => recipe.id !== recipeId);
+        this.notifications.success('Favori retiré');
+      }
+    });
+  }
+
+  deleteRecipe(recipeId: string): void {
+    if (!confirm('Supprimer définitivement cette recette ?')) {
+      return;
+    }
+    this.recipeService.deleteRecipe(recipeId).subscribe({
+      next: () => {
+        this.myRecipes = this.myRecipes.filter((recipe) => recipe.id !== recipeId);
+        this.notifications.success('Recette supprimée');
+      }
+    });
+  }
+
   private loadMyRecipes(userId: string): void {
     this.loadingRecipes = true;
     this.recipeService.getRecipes({ authorId: userId, limit: 20 }).subscribe({
       next: (response: PaginatedResponse<Recipe>) =>
-        (this.myRecipes = response.data),
+        (this.myRecipes = response.items),
       error: () => {
         this.loadingRecipes = false;
       },

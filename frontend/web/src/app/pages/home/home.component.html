@@ -1,16 +1,85 @@
-<section class="hero-section text-center py-5">
-  <div class="container">
-    <p class="text-uppercase text-warning small mb-2">Shop & Cook</p>
-    <h1 class="display-5 fw-bold mb-3">
-      Toutes vos recettes préférées en un clic
-    </h1>
-    <p class="text-muted mb-4">
-      Rechercher, filtrer et sauvegarder vos plats favoris.
-    </p>
+<section class="hero-section py-5">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="hero-eyebrow text-uppercase mb-2">Shop & Cook</p>
+      <h1 class="display-5 fw-bold mb-3">
+        Des recettes modernes pour simplifier vos courses
+      </h1>
+      <p class="text-muted mb-4">
+        Mixez vos envies, planifiez vos menus et sauvegardez vos trouvailles en
+        un instant. Shop & Cook rassemble inspirations et organisation pour
+        cuisiner sereinement.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" routerLink="/recipes/new">
+          Créer une recette
+        </a>
+        <a class="btn btn-outline-primary btn-lg" href="#recipes">
+          Explorer les recettes
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-value">{{ totalItems || '450+' }}</span>
+          <span class="stat-label">recettes partagées</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">94%</span>
+          <span class="stat-label">d'utilisateurs satisfaits</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">24 h</span>
+          <span class="stat-label">pour valider une recette</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="visual-card">
+        <div class="visual-header">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <h3 class="mb-2">Menu de la semaine</h3>
+        <ul class="visual-list">
+          <li>
+            <span class="label">MIDI</span>
+            <span class="value">Bowl thaï croustillant</span>
+          </li>
+          <li>
+            <span class="label">SOIR</span>
+            <span class="value">Lasagnes ricotta & pesto</span>
+          </li>
+          <li>
+            <span class="label">DESSERT</span>
+            <span class="value">Crème citron verveine</span>
+          </li>
+        </ul>
+        <div class="visual-footer">
+          <span class="badge">Courses prêtes</span>
+          <span class="badge outline">Gain ~35 min</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="container mb-4">
+<section class="container highlight-grid">
+  <div class="highlight-card">
+    <h3>Recherche multi-critères</h3>
+    <p>Trouvez le plat idéal selon vos envies, le temps disponible et la difficulté.</p>
+  </div>
+  <div class="highlight-card">
+    <h3>Favoris synchronisés</h3>
+    <p>Marquez vos coups de coeur et retrouvez-les sur tous vos appareils.</p>
+  </div>
+  <div class="highlight-card">
+    <h3>Communauté active</h3>
+    <p>Des recettes vérifiées et notées par des foodies passionnés.</p>
+  </div>
+</section>
+
+<section class="container mb-4" id="recipes">
   <app-recipe-filters
     [categories]="categories"
     (filterChange)="onFiltersChange($event)"
