@@ -1,11 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -17,7 +10,7 @@ import { Category } from '../../models/category.model';
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './recipe-filters.component.html',
-  styleUrls: ['./recipe-filters.component.scss'],
+  styleUrls: ['./recipe-filters.component.scss']
 })
 export class RecipeFiltersComponent implements OnInit, OnDestroy {
   @Input() categories: Category[] = [];
@@ -26,16 +19,15 @@ export class RecipeFiltersComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   filterForm = this.fb.group({
-    q: [''],
     category: [''],
     difficulty: [''],
-    maxTime: [''],
+    maxTime: ['']
   });
 
   difficulties = [
     { label: 'Facile', value: 'easy' },
     { label: 'Moyenne', value: 'medium' },
-    { label: 'Difficile', value: 'hard' },
+    { label: 'Difficile', value: 'hard' }
   ];
 
   constructor(private fb: FormBuilder) {}
@@ -45,11 +37,9 @@ export class RecipeFiltersComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
         this.filterChange.emit({
-          q: value.q || undefined,
           category: value.category || undefined,
-          difficulty:
-            (value.difficulty as RecipeQueryParams['difficulty']) || undefined,
-          maxTime: value.maxTime ? Number(value.maxTime) : undefined,
+          difficulty: (value.difficulty as RecipeQueryParams['difficulty']) || undefined,
+          maxTime: value.maxTime ? Number(value.maxTime) : undefined
         });
       });
   }
