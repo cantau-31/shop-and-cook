@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 
 import { Comment } from '../../models/comment.model';
@@ -17,7 +18,7 @@ interface AdminComment extends Comment {
   standalone: true,
   imports: [CommonModule, DecimalPipe, RouterLink, LoadingSpinnerComponent],
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.scss'],
+  styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit {
   recipes: Recipe[] = [];
@@ -55,18 +56,31 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  toggleVisibility(recipe: Recipe): void {
+    this.recipeService.toggleRecipeVisibility(recipe.id).subscribe({
+      next: (response) => {
+        const hiddenAt = response.hiddenAt ?? null;
+        this.recipes = this.recipes.map((item) =>
+          item.id === recipe.id ? { ...item, hiddenAt } : item
+        );
+        this.feedback = hiddenAt ? 'Recette masquée' : 'Recette restaurée';
+      },
+    });
+  }
+
   private loadData(): void {
     this.loading = true;
     this.error = null;
-    this.recipeService.getRecipes({ limit: 50, page: 1 }).subscribe({
-      next: (response) => {
-        this.recipes = response.items;
-        this.comments = response.items.flatMap((recipe) =>
-          (recipe.comments || []).map((comment) => ({
-            ...comment,
-            recipeTitle: recipe.title,
-          }))
-        );
+    forkJoin({
+      recipes: this.recipeService.getAdminRecipes({ limit: 50, page: 1, includeHidden: true }),
+      comments: this.commentService.getAdminComments(1, 50)
+    }).subscribe({
+      next: ({ recipes, comments }) => {
+        this.recipes = recipes.items;
+        this.comments = comments.items.map((comment) => ({
+          ...comment,
+          recipeTitle: comment.recipeTitle ?? 'Recette'
+        }));
       },
       error: () => {
         this.error = 'Impossible de charger les données admin.';

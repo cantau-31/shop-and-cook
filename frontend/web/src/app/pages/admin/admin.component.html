@@ -17,12 +17,14 @@
       @if (loading) {
       <app-loading-spinner label="Chargement des données..."></app-loading-spinner>
       } @else {
+      @if (recipes.length) {
       <table class="table align-middle">
         <thead>
           <tr>
             <th>Titre</th>
             <th>Catégorie</th>
             <th>Note</th>
+            <th>Statut</th>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
@@ -30,16 +32,32 @@
           @for (recipe of recipes; track recipe.id) {
           <tr>
             <td>{{ recipe.title }}</td>
-            <td>{{ recipe.category }}</td>
+            <td>{{ recipe.category || 'Sans catégorie' }}</td>
             <td>★ {{ recipe.rating | number : '1.1-1' }}</td>
+            <td>
+              @if (recipe.hiddenAt) {
+              <span class="badge text-bg-warning">Masquée</span>
+              } @else {
+              <span class="badge text-bg-success">Visible</span>
+              }
+            </td>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/recipe', recipe.id]">Voir</a>
+              <button
+                class="btn btn-sm btn-outline-secondary me-2"
+                (click)="toggleVisibility(recipe)"
+              >
+                {{ recipe.hiddenAt ? 'Réactiver' : 'Masquer' }}
+              </button>
               <button class="btn btn-sm btn-outline-danger" (click)="deleteRecipe(recipe.id)">Supprimer</button>
             </td>
           </tr>
           }
         </tbody>
       </table>
+      } @else {
+      <p class="text-muted mb-0">Aucune recette à afficher.</p>
+      }
       }
     </div>
   </div>
@@ -53,6 +71,7 @@
       @if (loading) {
       <app-loading-spinner label="Chargement des données..."></app-loading-spinner>
       } @else {
+      @if (comments.length) {
       <table class="table align-middle">
         <thead>
           <tr>
@@ -75,6 +94,9 @@
           }
         </tbody>
       </table>
+      } @else {
+      <p class="text-muted mb-0">Aucun commentaire à modérer.</p>
+      }
       }
     </div>
   </div>

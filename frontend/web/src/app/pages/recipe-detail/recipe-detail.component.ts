@@ -26,7 +26,7 @@ import { DifficultyLabelPipe } from '../../pipes/difficulty-label.pipe';
     LoadingSpinnerComponent,
   ],
   templateUrl: './recipe-detail.component.html',
-  styleUrls: ['./recipe-detail.component.scss'],
+  styleUrls: ['./recipe-detail.component.scss']
 })
 export class RecipeDetailComponent implements OnInit {
   recipe: Recipe | null = null;
@@ -70,8 +70,8 @@ export class RecipeDetailComponent implements OnInit {
       this.redirectToLogin();
       return;
     }
-    this.recipeService.toggleFavorite(this.recipe.id).subscribe(() => {
-      const nextFavoriteState = !this.recipe?.isFavorite;
+    const nextFavoriteState = !(this.recipe.isFavorite ?? false);
+    this.recipeService.toggleFavorite(this.recipe.id, nextFavoriteState).subscribe(() => {
       this.recipe = {
         ...this.recipe!,
         isFavorite: nextFavoriteState,

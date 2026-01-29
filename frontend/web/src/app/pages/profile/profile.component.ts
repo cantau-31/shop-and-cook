@@ -15,7 +15,7 @@ import { LoadingSpinnerComponent } from '../../components/loading-spinner/loadin
   standalone: true,
   imports: [CommonModule, RouterLink, LoadingSpinnerComponent],
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+  styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit {
   user: User | null = null;
@@ -52,7 +52,7 @@ export class ProfileComponent implements OnInit {
   }
 
   removeFavorite(recipeId: string): void {
-    this.recipeService.toggleFavorite(recipeId).subscribe({
+    this.recipeService.toggleFavorite(recipeId, false).subscribe({
       next: () => {
         this.favorites = this.favorites.filter((recipe) => recipe.id !== recipeId);
         this.notifications.success('Favori retiré');

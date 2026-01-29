@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { PaginatedResponse } from '../../models/pagination.model';
 import { Recipe, RecipeQueryParams } from '../../models/recipe.model';
@@ -8,21 +9,22 @@ import { RecipeService } from '../../services/recipe.service';
 import { AuthService } from '../../services/auth.service';
 import { CategoryService } from '../../services/category.service';
 import { NotificationService } from '../../services/notification.service';
-import { RecipeFiltersComponent } from '../../components/recipe-filters/recipe-filters.component';
 import { RecipeCardComponent } from '../../components/recipe-card/recipe-card.component';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
+import { RecipeFiltersComponent } from '../../components/recipe-filters/recipe-filters.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
+    FormsModule,
     RouterModule,
-    RecipeFiltersComponent,
     RecipeCardComponent,
     LoadingSpinnerComponent,
+    RecipeFiltersComponent
   ],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
   recipes: Recipe[] = [];
@@ -33,6 +35,8 @@ export class HomeComponent implements OnInit {
   error: string | null = null;
   filters: RecipeQueryParams = {};
   categories: Category[] = [];
+  searchTerm = '';
+  showFilters = false;
 
   constructor(
     private recipeService: RecipeService,
@@ -48,7 +52,12 @@ export class HomeComponent implements OnInit {
   }
 
   onFiltersChange(filters: RecipeQueryParams): void {
-    this.filters = filters;
+    const nextFilters: RecipeQueryParams = {
+      ...this.filters,
+      ...filters,
+      q: this.searchTerm || undefined
+    };
+    this.filters = nextFilters;
     this.page = 1;
     this.loadRecipes();
   }
@@ -62,11 +71,13 @@ export class HomeComponent implements OnInit {
       this.router.navigate(['/login'], { queryParams: { redirectTo: this.router.url } });
       return;
     }
-    this.recipeService.toggleFavorite(id).subscribe({
+    const target = this.recipes.find((recipe) => recipe.id === id);
+    const nextState = !(target?.isFavorite ?? false);
+    this.recipeService.toggleFavorite(id, nextState).subscribe({
       next: () => {
         this.notifications.success('Favori mis à jour');
         this.recipes = this.recipes.map((recipe) =>
-          recipe.id === id ? { ...recipe, isFavorite: !recipe.isFavorite } : recipe
+          recipe.id === id ? { ...recipe, isFavorite: nextState } : recipe
         );
       },
     });
@@ -87,6 +98,19 @@ export class HomeComponent implements OnInit {
 
   trackRecipe(_index: number, recipe: Recipe): string {
     return recipe.id;
+  }
+
+  onSearch(): void {
+    this.filters = {
+      ...this.filters,
+      q: this.searchTerm || undefined
+    };
+    this.page = 1;
+    this.loadRecipes();
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
   }
 
   private loadRecipes(): void {
