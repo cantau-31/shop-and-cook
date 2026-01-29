@@ -2,9 +2,9 @@ USE shopcook;
 
 -- Utilisateurs
 INSERT INTO users (email, password_hash, display_name, role) VALUES
-('admin@demo.com', '$2b$10$demoHashedPassword', 'Admin', 'ADMIN'),
-('user1@demo.com', '$2b$10$demoHashedPassword', 'Alice', 'USER'),
-('user2@demo.com', '$2b$10$demoHashedPassword', 'Bob', 'USER');
+('admin@demo.com', '$2b$11$fzLbnuo6FQMtm0h5O/axQefMWTos7TCIp7OUo2NGvFCU0kizn7D3a', 'Admin', 'ADMIN'),
+('user1@demo.com', '$2b$11$NiVe4LvIoEqXDCXQXVlhx.o5Ra4ge7SLxrMzc2bD/T4cnY3SHmrva', 'Alice', 'USER'),
+('user2@demo.com', '$2b$11$TkWDOrpiNYoFJavvA/beiuj9hIX/ycoP4CZ1osmZUBDK19PbOVPSa', 'Bob', 'USER');
 
 -- Catégories
 INSERT INTO categories (name, slug) VALUES
