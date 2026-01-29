@@ -7,8 +7,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { User } from '../users/entities/user.entity';
+import { Recipe } from '../recipes/entities/recipe.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { FindCommentsQueryDto } from './dto/find-comments-query.dto';
+import { FindAdminCommentsQueryDto } from './dto/find-admin-comments-query.dto';
 import { Comment } from './entities/comment.entity';
 
 @Injectable()
@@ -29,6 +31,29 @@ export class CommentsService {
 
     return {
       items: items.map((comment) => this.toPublicComment(comment)),
+      total,
+      page: query.page,
+      limit: query.limit,
+    };
+  }
+
+  async listAdmin(query: FindAdminCommentsQueryDto) {
+    const qb = this.repo
+      .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoinAndSelect('comment.recipe', 'recipe')
+      .orderBy('comment.createdAt', 'DESC')
+      .skip((query.page - 1) * query.limit)
+      .take(query.limit);
+
+    if (query.recipeId) {
+      qb.where('comment.recipeId = :recipeId', { recipeId: query.recipeId });
+    }
+
+    const [items, total] = await qb.getManyAndCount();
+
+    return {
+      items: items.map((comment) => this.toAdminComment(comment)),
       total,
       page: query.page,
       limit: query.limit,
@@ -88,6 +113,14 @@ export class CommentsService {
       authorName: comment.user?.displayName ?? 'Utilisateur',
       message: comment.body,
       createdAt: comment.createdAt,
+    };
+  }
+
+  private toAdminComment(comment: Comment & { user?: User; recipe?: Recipe }) {
+    const base = this.toPublicComment(comment);
+    return {
+      ...base,
+      recipeTitle: comment.recipe?.title ?? '',
     };
   }
 }

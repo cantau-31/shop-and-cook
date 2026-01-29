@@ -13,9 +13,12 @@ import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AccessTokenGuard } from '../common/guards/access-token.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { FindCommentsQueryDto } from './dto/find-comments-query.dto';
+import { FindAdminCommentsQueryDto } from './dto/find-admin-comments-query.dto';
 
 @ApiTags('comments')
 @Controller()
@@ -47,5 +50,13 @@ export class CommentsController {
   @Delete('comments/:id')
   deleteComment(@Param('id') id: string, @CurrentUser() user: any) {
     return this.commentsService.delete(id, user);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get('admin/comments')
+  listAdmin(@Query() query: FindAdminCommentsQueryDto) {
+    return this.commentsService.listAdmin(query);
   }
 }
