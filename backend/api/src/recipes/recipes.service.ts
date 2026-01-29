@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { DataSource, IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { Ingredient } from '../ingredients/entities/ingredient.entity';
 import { User } from '../users/entities/user.entity';
@@ -28,89 +28,28 @@ export class RecipesService {
   ) {}
 
   async findAllPublic(query: FindRecipesQueryDto) {
-    const baseQb = this.recipeRepo
-      .createQueryBuilder('recipe')
-      .leftJoinAndSelect('recipe.category', 'category')
-      .where('recipe.isPublished = :isPublished', { isPublished: true });
-
-    const applyFilters = (builder: SelectQueryBuilder<Recipe>) => {
-      if (query.q) {
-        builder.andWhere('LOWER(recipe.title) LIKE :q', {
-          q: `%${query.q.toLowerCase()}%`,
-        });
-      }
-
-      if (query.category) {
-        if (typeof query.category === 'number') {
-          builder.andWhere('recipe.categoryId = :category', {
-            category: query.category,
-          });
-        } else {
-          builder.andWhere('LOWER(category.name) = :categoryName', {
-            categoryName: query.category.toLowerCase(),
-          });
-        }
-      }
-
-      if (query.difficulty) {
-        builder.andWhere('recipe.difficulty = :difficulty', {
-          difficulty: query.difficulty,
-        });
-      }
-
-      if (query.maxTime) {
-        builder.andWhere('recipe.prepMinutes + recipe.cookMinutes <= :maxTime', {
-          maxTime: query.maxTime,
-        });
-      }
-
-      if (query.authorId) {
-        builder.andWhere('recipe.authorId = :authorId', {
-          authorId: query.authorId,
-        });
-      }
-    };
-
-    applyFilters(baseQb);
-
-    const qb = baseQb
-      .clone()
-      .leftJoin('recipe.ratings', 'rating')
-      .addSelect('AVG(rating.stars)', 'recipe_averageRating')
-      .addSelect('COUNT(rating.id)', 'recipe_ratingCount')
-      .groupBy('recipe.id')
-      .addGroupBy('category.id')
-      .orderBy('recipe.createdAt', 'DESC')
-      .take(query.limit)
-      .skip((query.page - 1) * query.limit);
-
-    const [{ raw, entities }, total] = await Promise.all([
-      qb.getRawAndEntities(),
-      baseQb.clone().getCount(),
-    ]);
-
-    const items = entities.map((recipe, index) => {
-      const row = raw[index] ?? {};
-      const average = Number(row['recipe_averageRating'] ?? 0);
-      const ratingCount = Number(row['recipe_ratingCount'] ?? 0);
-      return Object.assign(recipe, {
-        averageRating: average,
-        ratingCount,
-        rating: average,
-      });
+    const baseQb = this.buildListQuery(query, {
+      requirePublished: true,
+      requireVisible: true,
     });
 
-    return {
-      items,
-      total,
-      page: query.page,
-      limit: query.limit,
-    };
+    return this.executeListQuery(baseQb, query);
+  }
+
+  async findAllForAdmin(query: FindRecipesQueryDto) {
+    const baseQb = this.buildListQuery(query, {
+      requirePublished: false,
+      requireVisible: !(query.includeHidden ?? false),
+    });
+    return this.executeListQuery(baseQb, query);
   }
 
   async findPublicByIdOrSlug(idOrSlug: string) {
     const recipe = await this.recipeRepo.findOne({
-      where: [{ id: idOrSlug }, { slug: idOrSlug }],
+      where: [
+        { id: idOrSlug, isPublished: true, hiddenAt: IsNull() },
+        { slug: idOrSlug, isPublished: true, hiddenAt: IsNull() },
+      ],
       relations: ['category', 'ingredients', 'ingredients.ingredient', 'ratings'],
     });
 
@@ -207,9 +146,11 @@ export class RecipesService {
     return this.findPublicByIdOrSlug(recipe.id);
   }
 
-  hide(recipeId: string) {
-    void recipeId; // Fonctionnalité temporairement désactivée
-    return { success: true };
+  async hide(recipeId: string) {
+    const recipe = await this.findEntity(recipeId);
+    recipe.hiddenAt = recipe.hiddenAt ? null : new Date();
+    await this.recipeRepo.save(recipe);
+    return { success: true, hiddenAt: recipe.hiddenAt };
   }
 
   async replaceIngredients(
@@ -222,6 +163,105 @@ export class RecipesService {
     this.ensurePublishable(recipe.steps, ingredients);
     await this.syncIngredients(recipeId, ingredients);
     return this.findPublicByIdOrSlug(recipe.id);
+  }
+
+  private buildListQuery(
+    query: FindRecipesQueryDto,
+    options: { requirePublished?: boolean; requireVisible?: boolean } = {},
+  ) {
+    const baseQb = this.recipeRepo
+      .createQueryBuilder('recipe')
+      .leftJoinAndSelect('recipe.category', 'category');
+
+    if (options.requirePublished !== false) {
+      baseQb.where('recipe.isPublished = :isPublished', { isPublished: true });
+    } else {
+      baseQb.where('1=1');
+    }
+
+    if (options.requireVisible !== false) {
+      baseQb.andWhere('recipe.hiddenAt IS NULL');
+    }
+
+    this.applyFilters(baseQb, query);
+    return baseQb;
+  }
+
+  private applyFilters(builder: SelectQueryBuilder<Recipe>, query: FindRecipesQueryDto) {
+    if (query.q) {
+      builder.andWhere('LOWER(recipe.title) LIKE :q', {
+        q: `%${query.q.toLowerCase()}%`,
+      });
+    }
+
+    if (query.category) {
+      if (typeof query.category === 'number') {
+        builder.andWhere('recipe.categoryId = :category', {
+          category: query.category,
+        });
+      } else {
+        builder.andWhere('LOWER(category.name) = :categoryName', {
+          categoryName: query.category.toLowerCase(),
+        });
+      }
+    }
+
+    if (query.difficulty) {
+      builder.andWhere('recipe.difficulty = :difficulty', {
+        difficulty: query.difficulty,
+      });
+    }
+
+    if (query.maxTime) {
+      builder.andWhere('recipe.prepMinutes + recipe.cookMinutes <= :maxTime', {
+        maxTime: query.maxTime,
+      });
+    }
+
+    if (query.authorId) {
+      builder.andWhere('recipe.authorId = :authorId', {
+        authorId: query.authorId,
+      });
+    }
+  }
+
+  private async executeListQuery(
+    baseQb: SelectQueryBuilder<Recipe>,
+    query: FindRecipesQueryDto,
+  ) {
+    const qb = baseQb
+      .clone()
+      .leftJoin('recipe.ratings', 'rating')
+      .addSelect('AVG(rating.stars)', 'recipe_averageRating')
+      .addSelect('COUNT(rating.id)', 'recipe_ratingCount')
+      .groupBy('recipe.id')
+      .addGroupBy('category.id')
+      .orderBy('recipe.createdAt', 'DESC')
+      .take(query.limit)
+      .skip((query.page - 1) * query.limit);
+
+    const [{ raw, entities }, total] = await Promise.all([
+      qb.getRawAndEntities(),
+      baseQb.clone().getCount(),
+    ]);
+
+    const items = entities.map((recipe, index) => {
+      const row = raw[index] ?? {};
+      const average = Number(row['recipe_averageRating'] ?? 0);
+      const ratingCount = Number(row['recipe_ratingCount'] ?? 0);
+      return Object.assign(recipe, {
+        averageRating: average,
+        ratingCount,
+        rating: average,
+      });
+    });
+
+    return {
+      items,
+      total,
+      page: query.page,
+      limit: query.limit,
+    };
   }
 
   async remove(recipeId: string, user: User) {

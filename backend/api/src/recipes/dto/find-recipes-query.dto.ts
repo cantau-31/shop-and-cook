@@ -68,4 +68,17 @@ export class FindRecipesQueryDto {
   @Min(1)
   @Max(100)
   limit = 12;
+
+  @ApiPropertyOptional({
+    description: 'Include hidden recipes (admin only)',
+    default: false
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined;
+    if (typeof value === 'boolean') return value;
+    const normalized = value.toString().toLowerCase();
+    return normalized === 'true' || normalized === '1';
+  })
+  includeHidden?: boolean;
 }

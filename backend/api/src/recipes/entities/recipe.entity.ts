@@ -67,6 +67,9 @@ export class Recipe {
   @Column({ name: 'is_published', type: 'tinyint', default: true })
   isPublished!: boolean;
 
+  @Column({ name: 'hidden_at', type: 'datetime', nullable: true })
+  hiddenAt?: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'datetime' })
   createdAt!: Date;
 
@@ -87,4 +90,3 @@ export class Recipe {
   @OneToMany(() => Favorite, (favorite) => favorite.recipe)
   favorites!: Favorite[];
 }
-

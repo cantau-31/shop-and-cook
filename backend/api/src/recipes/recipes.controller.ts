@@ -31,6 +31,14 @@ export class RecipesController {
     return this.recipesService.findAllPublic(query);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Get('admin')
+  findAllAdmin(@Query() query: FindRecipesQueryDto) {
+    return this.recipesService.findAllForAdmin(query);
+  }
+
   @Get(':idOrSlug')
   findOne(@Param('idOrSlug') idOrSlug: string) {
     return this.recipesService.findPublicByIdOrSlug(idOrSlug);
