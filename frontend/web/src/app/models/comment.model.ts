@@ -5,4 +5,5 @@ export interface Comment {
   authorId: string;
   message: string;
   createdAt: string;
+  recipeTitle?: string;
 }

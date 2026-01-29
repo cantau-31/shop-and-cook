@@ -24,6 +24,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   steps: string[];
   comments?: Comment[];
+  hiddenAt?: string | null;
 }
 
 export interface RecipeQueryParams {
@@ -34,4 +35,5 @@ export interface RecipeQueryParams {
   limit?: number;
   maxTime?: number;
   authorId?: string;
+  includeHidden?: boolean;
 }
