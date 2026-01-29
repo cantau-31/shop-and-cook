@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -7,9 +7,12 @@ import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TokenPayload } from './auth.constants';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -60,7 +63,22 @@ export class AuthService {
   }
 
   async refresh(user: TokenPayload) {
-    return this.buildTokens(user);
+    const entity = await this.usersService.findById(user.sub);
+    if (!entity) {
+      throw new UnauthorizedException({
+        code: 'ERR_INVALID_REFRESH',
+        message: 'Invalid refresh token',
+      });
+    }
+    return this.buildAuthResponse(entity);
+  }
+
+  async requestPasswordReset(dto: ForgotPasswordDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (user) {
+      this.logger.log(`Password reset requested for ${user.email}`);
+    }
+    return { success: true };
   }
 
   private async buildAuthResponse(user: {
