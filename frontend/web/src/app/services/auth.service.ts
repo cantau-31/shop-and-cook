@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, finalize, map, Observable, shareReplay, tap, throwError } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { User, UserRole } from '../models/user.model';
@@ -16,6 +16,7 @@ export interface RegisterPayload extends LoginPayload {
 
 interface AuthResponse {
   accessToken: string;
+  refreshToken: string;
   user: User;
 }
 
@@ -25,8 +26,10 @@ interface AuthResponse {
 export class AuthService {
   private readonly tokenKey = 'sc_token';
   private readonly userKey = 'sc_user';
+  private readonly refreshTokenKey = 'sc_refresh';
   private readonly baseUrl = environment.apiUrl;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private refreshInFlight$?: Observable<AuthResponse>;
 
   currentUser$ = this.currentUserSubject.asObservable();
 
@@ -57,17 +60,28 @@ export class AuthService {
   }
 
   requestPasswordReset(email: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/auth/forgot-password`, { email });
+    return this.http
+      .post<{ success: boolean }>(`${this.baseUrl}/auth/forgot-password`, { email })
+      .pipe(map(() => void 0));
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.refreshTokenKey);
     this.currentUserSubject.next(null);
   }
 
   get token(): string | null {
     return localStorage.getItem(this.tokenKey);
+  }
+
+  private get refreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
+  }
+
+  get hasRefreshToken(): boolean {
+    return !!this.refreshToken;
   }
 
   isLoggedIn(): boolean {
@@ -84,8 +98,37 @@ export class AuthService {
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }
 
+  refreshSession(): Observable<AuthResponse> {
+    if (!this.refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    if (!this.refreshInFlight$) {
+      this.refreshInFlight$ = this.http
+        .post<AuthResponse>(
+          `${this.baseUrl}/auth/refresh`,
+          { refreshToken: this.refreshToken },
+          {
+            headers: {
+              Authorization: `Bearer ${this.refreshToken}`
+            }
+          }
+        )
+        .pipe(
+          tap((response) => this.persistSession(response)),
+          finalize(() => {
+            this.refreshInFlight$ = undefined;
+          }),
+          shareReplay(1)
+        );
+    }
+
+    return this.refreshInFlight$;
+  }
+
   private persistSession(response: AuthResponse): void {
     localStorage.setItem(this.tokenKey, response.accessToken);
+    localStorage.setItem(this.refreshTokenKey, response.refreshToken);
     localStorage.setItem(this.userKey, JSON.stringify(response.user));
     this.currentUserSubject.next(response.user);
   }

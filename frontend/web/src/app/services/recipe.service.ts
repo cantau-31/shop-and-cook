@@ -35,6 +35,8 @@ interface RecipeApi {
   }>;
   steps?: string[] | string;
   steps_json?: string;
+  hiddenAt?: string | null;
+  hidden_at?: string | null;
 }
 
 @Injectable({
@@ -56,6 +58,24 @@ export class RecipeService {
 
     return this.http
       .get<PaginatedResponse<RecipeApi>>(`${this.baseUrl}/recipes`, { params })
+      .pipe(
+        map((response) => ({
+          ...response,
+          items: (response.items || []).map((item) => this.mapRecipe(item))
+        }))
+      );
+  }
+
+  getAdminRecipes(filters: RecipeQueryParams = {}): Observable<PaginatedResponse<Recipe>> {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+
+    return this.http
+      .get<PaginatedResponse<RecipeApi>>(`${this.baseUrl}/recipes/admin`, { params })
       .pipe(
         map((response) => ({
           ...response,
@@ -86,14 +106,22 @@ export class RecipeService {
     return this.http.delete<void>(`${this.baseUrl}/recipes/${id}`);
   }
 
+  toggleRecipeVisibility(id: string): Observable<{ success: boolean; hiddenAt?: string }> {
+    return this.http.patch<{ success: boolean; hiddenAt?: string }>(
+      `${this.baseUrl}/recipes/admin/${id}/hide`,
+      {}
+    );
+  }
+
   rateRecipe(id: string, rating: number): Observable<{ stars: number; average: number }> {
     return this.http.post<{ stars: number; average: number }>(`${this.baseUrl}/recipes/${id}/rating`, {
       stars: rating
     });
   }
 
-  toggleFavorite(id: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/recipes/${id}/favorite`, {});
+  toggleFavorite(id: string, shouldFavorite: boolean): Observable<void> {
+    const url = `${this.baseUrl}/recipes/${id}/favorite`;
+    return shouldFavorite ? this.http.post<void>(url, {}) : this.http.delete<void>(url);
   }
 
   getFavorites(): Observable<Recipe[]> {
@@ -145,7 +173,8 @@ export class RecipeService {
           unit: item.unit ?? item.ingredient?.unitDefault ?? ''
         })) ?? [],
       steps: this.resolveSteps(api.steps ?? api.steps_json),
-      comments: []
+      comments: [],
+      hiddenAt: api.hiddenAt ?? api.hidden_at ?? null
     };
   }
 

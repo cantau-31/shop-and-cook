@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
@@ -18,6 +18,8 @@ interface CommentApi {
   created_at?: string;
   authorName?: string;
   user?: { displayName?: string };
+  recipeTitle?: string;
+  recipe?: { title?: string };
 }
 
 @Injectable({
@@ -44,12 +46,25 @@ export class CommentService {
     return this.http.delete<void>(`${this.baseUrl}/comments/${commentId}`);
   }
 
+  getAdminComments(page = 1, limit = 20): Observable<PaginatedResponse<Comment>> {
+    let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
+    return this.http
+      .get<PaginatedResponse<CommentApi>>(`${this.baseUrl}/admin/comments`, { params })
+      .pipe(
+        map((response) => ({
+          ...response,
+          items: (response.items || []).map(this.mapComment)
+        }))
+      );
+  }
+
   private mapComment = (api: CommentApi): Comment => ({
     id: api.id?.toString() ?? `${Date.now()}`,
     recipeId: api.recipeId?.toString() ?? api.recipe_id?.toString() ?? '',
     authorId: api.userId?.toString() ?? api.user_id?.toString() ?? '',
     authorName: api.authorName ?? api.user?.displayName ?? 'Utilisateur',
     message: api.body ?? api.message ?? '',
-    createdAt: api.createdAt ?? api.created_at ?? new Date().toISOString()
+    createdAt: api.createdAt ?? api.created_at ?? new Date().toISOString(),
+    recipeTitle: api.recipeTitle ?? api.recipe?.title
   });
 }
