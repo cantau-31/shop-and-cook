@@ -22,6 +22,7 @@ import { CommentsModule } from './comments/comments.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { CategoriesModule } from './categories/categories.module';
+import { IngredientsModule } from './ingredients/ingredients.module';
 
 @Module({
   imports: [
@@ -54,7 +55,8 @@ import { CategoriesModule } from './categories/categories.module';
     CommentsModule,
     RatingsModule,
     FavoritesModule,
-    CategoriesModule
+    CategoriesModule,
+    IngredientsModule
   ],
   providers: [
     {
