@@ -54,7 +54,8 @@ export class FavoritesService {
       return Object.assign(recipe, {
         averageRating: average,
         ratingCount,
-        rating: average
+        rating: average,
+        isFavorite: true
       });
     });
   }
