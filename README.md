@@ -1,46 +1,49 @@
 # Shop & Cook
-Parfait 🔥 on va faire ça proprement, étape par étape — tu vas avoir un **dépôt GitHub pro**, prêt à héberger ton projet *Shop & Cook (Angular + NestJS + MySQL)*.
 
-**Shop & Cook** est une application web full-stack permettant de créer, consulter et partager des recettes de cuisine.
-Chaque recette contient des ingrédients structurés (quantité + unité), des étapes, une durée, une difficulté, et peut être notée/commentée par les utilisateurs.
+**Shop & Cook** est une application web full-stack dédiée à la création, la consultation et le partage de recettes de cuisine.
+
+Chaque recette est composée d’ingrédients structurés (quantité et unité), d’étapes de préparation, d’une durée, d’un niveau de difficulté, et peut être notée ou commentée par les utilisateurs.
+
+Le projet est construit autour d’une architecture moderne et prête pour le déploiement.
+
+---
 
 ## Stack technique
 
-| Partie | Technologie |
-|--------|--------------|
-| Frontend | Angular 17 + TailwindCSS |
-| Backend | NestJS (Node.js + TypeScript) |
-| Base de données | MySQL |
-| ORM | TypeORM |
-| Auth | JWT (Access + Refresh) |
-| Tests | Jest / Cypress |
-| Hébergement | Vercel (front), Render (API), Railway (MySQL) |
+| Composant        | Technologie                                 |
+| ---------------- | ------------------------------------------- |
+| Frontend         | Angular 17, TailwindCSS                     |
+| Backend          | NestJS (Node.js, TypeScript)                |
+| Base de données  | MySQL                                       |
+| ORM              | TypeORM                                     |
+| Authentification | JWT (access & refresh tokens)               |
+| Tests            | Jest, Cypress                               |
+| Déploiement      | Vercel (front), Render (API), Railway (BDD) |
 
 ---
 
 ## Structure du projet
+
 ```
-
 shop-and-cook/
-├── frontend/ → Angular app
-├── backend/  → NestJS API
-├── sql/      → Scripts SQL (BDD + seeds)
-├── docs/     → Maquettes, cahier des charges, UML
+├── frontend/   # Application Angular
+├── backend/    # API NestJS
+├── sql/        # Scripts SQL (création et seeds)
+├── docs/       # Documentation, maquettes, UML
 └── README.md
-
-````
+```
 
 ---
 
-## ⚙️ Installation
+## Installation
+Cloner le dépôt
 
-### Cloner le repo
 ```bash
 git clone https://github.com/<ton_pseudo>/shop-and-cook.git
 cd shop-and-cook
-````
-
-### Lancer le backend
+```
+ 
+Démarrer le backend
 
 ```bash
 cd backend
@@ -48,7 +51,7 @@ npm install
 npm run start:dev
 ```
 
-### Lancer le frontend
+### Démarrer le frontend
 
 ```bash
 cd ../frontend
@@ -60,7 +63,7 @@ npm start
 
 ## Variables d’environnement
 
-### Backend (.env)
+### Backend (`.env`)
 
 ```
 DB_HOST=127.0.0.1
@@ -71,7 +74,7 @@ DB_NAME=shopcook
 JWT_SECRET=supersecret
 ```
 
-### Frontend (.env)
+### Frontend (`.env`)
 
 ```
 API_URL=http://localhost:3000/api/v1
@@ -81,19 +84,28 @@ API_URL=http://localhost:3000/api/v1
 
 ## Tests
 
-* **Unitaires** : `npm run test`
-* **End-to-End** : `npm run e2e`
+* **Tests unitaires** : `npm run test`
+* **Tests end-to-end** : `npm run e2e`
 
 ---
 
 ## Déploiement
 
-* Frontend : [Vercel](https://vercel.com/)
-* Backend : [Render](https://render.com/)
-* Base MySQL : [Railway](https://railway.app/)
+* Frontend : Vercel
+* Backend : Render
+* Base de données MySQL : Railway
 
 ---
 
-## Auteurs
+## Auteur
 
-* Julien Cantau — Développeur Full Stack
+**Julien Cantau**
+Développeur Full Stack
+
+---
+
+Si tu veux, je peux aussi :
+
+* le rendre **plus académique** (pour un dossier scolaire),
+* **plus marketing** (portfolio / recruteur),
+* ou **plus technique** (orienté dev senior).
