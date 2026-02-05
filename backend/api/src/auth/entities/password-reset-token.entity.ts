@@ -4,7 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { User } from '../../users/entities/user.entity';
@@ -17,7 +17,9 @@ export class PasswordResetToken {
   @Column({ name: 'user_id', type: 'bigint', unsigned: true })
   userId!: string;
 
-  @ManyToOne(() => User, (user) => user.passwordResetTokens, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.passwordResetTokens, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
@@ -30,9 +32,9 @@ export class PasswordResetToken {
   @Column({ name: 'used_at', type: 'datetime', nullable: true })
   usedAt?: Date | null;
 
-  @Column({ 
-    name: 'created_at', 
-    type: 'datetime'
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
   })
   createdAt!: Date;
 }

@@ -5,7 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  Unique
+  Unique,
 } from 'typeorm';
 
 import { Recipe } from '../../recipes/entities/recipe.entity';
@@ -26,9 +26,9 @@ export class Rating {
   @Column({ type: 'tinyint', unsigned: true })
   stars!: number;
 
-  @Column({ 
-    name: 'created_at', 
-    type: 'datetime'
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
   })
   createdAt!: Date;
 

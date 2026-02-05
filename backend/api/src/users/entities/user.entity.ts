@@ -4,7 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { Comment } from '../../comments/entities/comment.entity';
@@ -35,9 +35,9 @@ export class User {
   @Column({ name: 'blocked_at', type: 'datetime', nullable: true })
   blockedAt?: Date | null;
 
-  @Column({ 
-    name: 'created_at', 
-    type: 'datetime'
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
   })
   createdAt!: Date;
 

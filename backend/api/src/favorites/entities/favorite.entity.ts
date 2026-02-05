@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 import { Recipe } from '../../recipes/entities/recipe.entity';
 import { User } from '../../users/entities/user.entity';
@@ -11,9 +18,9 @@ export class Favorite {
   @PrimaryColumn({ name: 'recipe_id', type: 'bigint', unsigned: true })
   recipeId!: string;
 
-  @Column({ 
-    name: 'created_at', 
-    type: 'datetime'
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
   })
   createdAt!: Date;
 
@@ -21,7 +28,9 @@ export class Favorite {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Recipe, (recipe) => recipe.favorites, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Recipe, (recipe) => recipe.favorites, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'recipe_id' })
   recipe!: Recipe;
 }

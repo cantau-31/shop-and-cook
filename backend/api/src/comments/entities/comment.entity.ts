@@ -25,9 +25,9 @@ export class Comment {
   @Column({ type: 'text' })
   body!: string;
 
-  @Column({ 
-    name: 'created_at', 
-    type: 'datetime'
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
   })
   createdAt!: Date;
 

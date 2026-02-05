@@ -29,13 +29,13 @@ import { PasswordResetToken } from './auth/entities/password-reset-token.entity'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, databaseConfig]
+      load: [appConfig, authConfig, databaseConfig],
     }),
     ThrottlerModule.forRoot([
       {
         ttl: 60,
-        limit: 30
-      }
+        limit: 30,
+      },
     ]),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
@@ -45,11 +45,21 @@ import { PasswordResetToken } from './auth/entities/password-reset-token.entity'
         username: process.env.DB_USER ?? 'root',
         password: process.env.DB_PASS ?? '',
         database: process.env.DB_NAME ?? 'shopcook',
-        entities: [User, Category, Ingredient, Recipe, RecipeIngredient, Rating, Comment, Favorite, PasswordResetToken],
+        entities: [
+          User,
+          Category,
+          Ingredient,
+          Recipe,
+          RecipeIngredient,
+          Rating,
+          Comment,
+          Favorite,
+          PasswordResetToken,
+        ],
         synchronize: true,
         logging: false,
-        subscribers: []
-      })
+        subscribers: [],
+      }),
     }),
     UsersModule,
     AuthModule,
@@ -58,13 +68,13 @@ import { PasswordResetToken } from './auth/entities/password-reset-token.entity'
     RatingsModule,
     FavoritesModule,
     CategoriesModule,
-    IngredientsModule
+    IngredientsModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard
-    }
-  ]
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -71,9 +71,9 @@ export class Recipe {
   @Column({ name: 'hidden_at', type: 'datetime', nullable: true })
   hiddenAt?: Date | null;
 
-  @Column({ 
-    name: 'created_at', 
-    type: 'datetime'
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
   })
   createdAt!: Date;
 
