@@ -13,7 +13,18 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          if (this.authService.isLoggedIn()) {
+          const alreadyRetried = req.headers.has('x-refresh-attempted');
+          const isAuthEndpoint =
+            req.url.includes('/auth/login') ||
+            req.url.includes('/auth/register') ||
+            req.url.includes('/auth/refresh') ||
+            req.url.includes('/auth/forgot-password') ||
+            req.url.includes('/auth/reset-password');
+
+          const canRefresh =
+            this.authService.hasRefreshToken && !alreadyRetried && !isAuthEndpoint;
+
+          if (!canRefresh && this.authService.isLoggedIn()) {
             this.notifications.error('Session expirée. Merci de vous reconnecter.');
             this.authService.logout();
           }

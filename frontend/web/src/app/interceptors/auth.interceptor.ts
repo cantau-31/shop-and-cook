@@ -61,7 +61,8 @@ export class AuthInterceptor implements HttpInterceptor {
       url.includes('/auth/login') ||
       url.includes('/auth/register') ||
       url.includes('/auth/refresh') ||
-      url.includes('/auth/forgot-password')
+      url.includes('/auth/forgot-password') ||
+      url.includes('/auth/reset-password')
     );
   }
 }
