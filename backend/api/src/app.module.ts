@@ -46,7 +46,7 @@ import { PasswordResetToken } from './auth/entities/password-reset-token.entity'
         password: process.env.DB_PASS ?? '',
         database: process.env.DB_NAME ?? 'shopcook',
         entities: [User, Category, Ingredient, Recipe, RecipeIngredient, Rating, Comment, Favorite, PasswordResetToken],
-        synchronize: false,
+        synchronize: true,
         logging: false
       })
     }),
