@@ -22,7 +22,7 @@ async function bootstrap() {
 
     app.use(helmet());
     app.enableCors({
-      origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:4200',
+      origin: '*',
       credentials: true
     });
     app.use(json({ limit: '1mb' }));
