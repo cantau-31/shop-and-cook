@@ -50,7 +50,7 @@ export class RecipesService {
         { id: idOrSlug, isPublished: true, hiddenAt: IsNull() },
         { slug: idOrSlug, isPublished: true, hiddenAt: IsNull() },
       ],
-      relations: ['category', 'ingredients', 'ingredients.ingredient', 'ratings'],
+      relations: ['category', 'ingredients', 'ingredients.ingredient', 'ratings', 'author'],
     });
 
     if (!recipe) {
