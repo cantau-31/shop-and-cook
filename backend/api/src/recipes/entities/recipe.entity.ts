@@ -1,5 +1,6 @@
 import {
   BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -50,7 +51,14 @@ export class Recipe {
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   difficulty!: number;
 
-  @Column({ name: 'steps_json', type: 'json' })
+  @Column({ 
+    name: 'steps_json', 
+    type: 'text',
+    transformer: {
+      to: (value: string[]) => JSON.stringify(value),
+      from: (value: string) => JSON.parse(value)
+    }
+  })
   steps!: string[];
 
   @ManyToOne(() => Category, (category) => category.recipes, { nullable: true })
@@ -82,8 +90,17 @@ export class Recipe {
     this.createdAt = new Date();
   }
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  @Column({ 
+    name: 'updated_at', 
+    type: 'datetime'
+  })
   updatedAt!: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  setUpdatedAt() {
+    this.updatedAt = new Date();
+  }
 
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe, {
     cascade: true,
