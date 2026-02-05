@@ -70,7 +70,11 @@ export class Recipe {
   @Column({ name: 'hidden_at', type: 'datetime', nullable: true })
   hiddenAt?: Date | null;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  @Column({ 
+    name: 'created_at', 
+    type: 'datetime', 
+    default: () => 'CURRENT_TIMESTAMP' 
+  })
   createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })

@@ -34,7 +34,11 @@ export class User {
   @Column({ name: 'blocked_at', type: 'datetime', nullable: true })
   blockedAt?: Date | null;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  @Column({ 
+    name: 'created_at', 
+    type: 'datetime', 
+    default: () => 'CURRENT_TIMESTAMP' 
+  })
   createdAt!: Date;
 
   @OneToMany(() => Recipe, (recipe) => recipe.author)

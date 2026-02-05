@@ -26,7 +26,11 @@ export class Rating {
   @Column({ type: 'tinyint', unsigned: true })
   stars!: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  @Column({ 
+    name: 'created_at', 
+    type: 'datetime', 
+    default: () => 'CURRENT_TIMESTAMP' 
+  })
   createdAt!: Date;
 
   @ManyToOne(() => User, (user) => user.ratings, { eager: false })

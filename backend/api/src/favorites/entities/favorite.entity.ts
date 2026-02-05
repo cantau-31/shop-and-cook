@@ -11,7 +11,11 @@ export class Favorite {
   @PrimaryColumn({ name: 'recipe_id', type: 'bigint', unsigned: true })
   recipeId!: string;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  @Column({ 
+    name: 'created_at', 
+    type: 'datetime', 
+    default: () => 'CURRENT_TIMESTAMP' 
+  })
   createdAt!: Date;
 
   @ManyToOne(() => User, (user) => user.favorites, { onDelete: 'CASCADE' })
