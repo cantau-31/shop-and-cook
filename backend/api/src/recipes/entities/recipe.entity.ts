@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -72,10 +73,14 @@ export class Recipe {
 
   @Column({ 
     name: 'created_at', 
-    type: 'datetime', 
-    default: () => 'CURRENT_TIMESTAMP' 
+    type: 'datetime'
   })
   createdAt!: Date;
+
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = new Date();
+  }
 
   @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
   updatedAt!: Date;

@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -36,10 +37,14 @@ export class User {
 
   @Column({ 
     name: 'created_at', 
-    type: 'datetime', 
-    default: () => 'CURRENT_TIMESTAMP' 
+    type: 'datetime'
   })
   createdAt!: Date;
+
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = new Date();
+  }
 
   @OneToMany(() => Recipe, (recipe) => recipe.author)
   recipes!: Recipe[];

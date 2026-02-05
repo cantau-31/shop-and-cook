@@ -28,8 +28,7 @@ export class Rating {
 
   @Column({ 
     name: 'created_at', 
-    type: 'datetime', 
-    default: () => 'CURRENT_TIMESTAMP' 
+    type: 'datetime'
   })
   createdAt!: Date;
 

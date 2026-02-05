@@ -13,8 +13,7 @@ export class Favorite {
 
   @Column({ 
     name: 'created_at', 
-    type: 'datetime', 
-    default: () => 'CURRENT_TIMESTAMP' 
+    type: 'datetime'
   })
   createdAt!: Date;
 

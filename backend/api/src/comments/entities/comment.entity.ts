@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -26,10 +27,14 @@ export class Comment {
 
   @Column({ 
     name: 'created_at', 
-    type: 'datetime', 
-    default: () => 'CURRENT_TIMESTAMP' 
+    type: 'datetime'
   })
   createdAt!: Date;
+
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = new Date();
+  }
 
   @ManyToOne(() => User, (user) => user.comments)
   @JoinColumn({ name: 'user_id' })
