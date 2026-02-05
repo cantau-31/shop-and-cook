@@ -11,9 +11,11 @@
         cuisiner sereinement.
       </p>
       <div class="hero-actions">
+        @if (!(authService.isAdmin())) {
         <a class="btn btn-primary btn-lg" routerLink="/recipes/new">
           Créer une recette
         </a>
+        }
         <a class="btn btn-outline-primary btn-lg" href="#recipes">
           Explorer les recettes
         </a>
@@ -96,6 +98,7 @@
             class="form-control"
             name="searchTerm"
             [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
             placeholder="Recette, ingrédient, auteur..."
           />
           <button class="btn btn-primary" type="submit">Rechercher</button>
@@ -113,7 +116,7 @@
     </form>
   </div>
   @if (showFilters) {
-  <div class="filters-panel p-4">
+  <div class="glass-panel search-panel mb-3">
     <app-recipe-filters
       [categories]="categories"
       (filterChange)="onFiltersChange($event)"

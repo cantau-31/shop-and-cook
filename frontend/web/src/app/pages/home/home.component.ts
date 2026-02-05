@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -26,7 +26,7 @@ import { RecipeFiltersComponent } from '../../components/recipe-filters/recipe-f
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   recipes: Recipe[] = [];
   totalItems = 0;
   page = 1;
@@ -37,11 +37,12 @@ export class HomeComponent implements OnInit {
   categories: Category[] = [];
   searchTerm = '';
   showFilters = false;
+  private searchDebounce?: ReturnType<typeof setTimeout>;
 
   constructor(
     private recipeService: RecipeService,
     private router: Router,
-    private authService: AuthService,
+    public authService: AuthService,
     private categoryService: CategoryService,
     private notifications: NotificationService
   ) {}
@@ -49,6 +50,12 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
     this.loadRecipes();
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchDebounce) {
+      clearTimeout(this.searchDebounce);
+    }
   }
 
   onFiltersChange(filters: RecipeQueryParams): void {
@@ -107,6 +114,14 @@ export class HomeComponent implements OnInit {
     };
     this.page = 1;
     this.loadRecipes();
+  }
+
+  onSearchTermChange(term: string): void {
+    this.searchTerm = term;
+    if (this.searchDebounce) {
+      clearTimeout(this.searchDebounce);
+    }
+    this.searchDebounce = setTimeout(() => this.onSearch(), 300);
   }
 
   toggleFilters(): void {
