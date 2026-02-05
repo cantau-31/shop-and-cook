@@ -37,8 +37,12 @@ export class LoginComponent {
 
     this.authService.login(this.form.value as LoginPayload).subscribe({
       next: () => {
-        const redirectTo =
-          this.route.snapshot.queryParamMap.get('redirectTo') || '/';
+        const user = this.authService.currentUser;
+        if (user?.role === 'ADMIN') {
+          this.router.navigate(['/admin']);
+          return;
+        }
+        const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/';
         this.router.navigate([redirectTo]);
       },
       error: () => {

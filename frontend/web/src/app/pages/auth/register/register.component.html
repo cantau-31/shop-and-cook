@@ -17,6 +17,13 @@
               <label class="form-label">Mot de passe</label>
               <input type="password" class="form-control" formControlName="password" />
             </div>
+            <div class="mb-3">
+              <label class="form-label">Confirmer le mot de passe</label>
+              <input type="password" class="form-control" formControlName="confirmPassword" />
+            </div>
+            @if (form.hasError('passwordsMismatch') && form.get('confirmPassword')?.touched) {
+            <div class="text-danger small mb-3">Les mots de passe ne correspondent pas.</div>
+            }
             <div class="d-grid gap-2">
               <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting">
                 {{ isSubmitting ? 'Création...' : 'Créer mon compte' }}
