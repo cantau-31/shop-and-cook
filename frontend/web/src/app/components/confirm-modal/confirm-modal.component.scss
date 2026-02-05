@@ -1,0 +1,31 @@
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1.5rem;
+}
+
+.confirm-modal {
+  width: min(420px, 100%);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 35px 80px rgba(15, 23, 42, 0.2);
+  background: #f1f1f1;
+}
+
+.modal-body p {
+  margin: 0;
+  color: var(--sc-muted);
+}
+
+.btn-close {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+}

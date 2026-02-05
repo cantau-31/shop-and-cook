@@ -7,3 +7,8 @@ export interface User {
   role: UserRole;
   avatarUrl?: string;
 }
+
+export interface AdminUser extends User {
+  createdAt?: string;
+  blockedAt?: string | null;
+}
