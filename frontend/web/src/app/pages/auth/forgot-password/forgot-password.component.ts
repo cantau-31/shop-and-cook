@@ -15,6 +15,7 @@ import { AuthService } from '../../../services/auth.service';
 export class ForgotPasswordComponent {
   isSubmitting = false;
   success = false;
+  resetToken: string | null = null;
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -30,8 +31,14 @@ export class ForgotPasswordComponent {
     this.authService
       .requestPasswordReset(this.form.value.email as string)
       .subscribe({
-        next: () => (this.success = true),
-        error: () => (this.success = false),
+        next: (response) => {
+          this.success = true;
+          this.resetToken = response.resetToken ?? null;
+        },
+        error: () => {
+          this.success = false;
+          this.resetToken = null;
+        },
         complete: () => (this.isSubmitting = false),
       });
   }

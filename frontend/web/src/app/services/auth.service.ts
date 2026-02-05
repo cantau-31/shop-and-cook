@@ -14,6 +14,16 @@ export interface RegisterPayload extends LoginPayload {
   displayName: string;
 }
 
+export interface ResetPasswordPayload {
+  token: string;
+  password: string;
+}
+
+interface PasswordResetResponse {
+  success: boolean;
+  resetToken?: string;
+}
+
 interface AuthResponse {
   accessToken: string;
   refreshToken: string;
@@ -32,6 +42,10 @@ export class AuthService {
   private refreshInFlight$?: Observable<AuthResponse>;
 
   currentUser$ = this.currentUserSubject.asObservable();
+
+  get currentUser(): User | null {
+    return this.currentUserSubject.value;
+  }
 
   constructor(private http: HttpClient) {
     const storedToken = localStorage.getItem(this.tokenKey);
@@ -59,9 +73,13 @@ export class AuthService {
       );
   }
 
-  requestPasswordReset(email: string): Observable<void> {
+  requestPasswordReset(email: string): Observable<PasswordResetResponse> {
+    return this.http.post<PasswordResetResponse>(`${this.baseUrl}/auth/forgot-password`, { email });
+  }
+
+  resetPassword(payload: ResetPasswordPayload): Observable<void> {
     return this.http
-      .post<{ success: boolean }>(`${this.baseUrl}/auth/forgot-password`, { email })
+      .post<{ success: boolean }>(`${this.baseUrl}/auth/reset-password`, payload)
       .pipe(map(() => void 0));
   }
 
@@ -91,6 +109,10 @@ export class AuthService {
   hasRole(role: UserRole): boolean {
     const user = this.currentUserSubject.value;
     return !!user && user.role === role;
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('ADMIN');
   }
 
   updateStoredUser(user: User): void {
