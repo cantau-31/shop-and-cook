@@ -50,7 +50,7 @@ export class RecipeDetailComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
-      this.isAuthenticated = !!user;
+      this.isAuthenticated = !!user && user.role === 'USER';
     });
 
     this.route.paramMap.subscribe((params) => {

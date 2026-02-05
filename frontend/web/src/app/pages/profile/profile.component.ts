@@ -33,9 +33,12 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user) => {
       this.user = user;
-      if (user) {
+      if (user?.role === 'USER') {
         this.loadFavorites();
         this.loadMyRecipes(user.id);
+      } else {
+        this.favorites = [];
+        this.myRecipes = [];
       }
     });
   }

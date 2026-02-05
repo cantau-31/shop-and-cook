@@ -22,15 +22,19 @@
     </button>
     <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        @if (!(user$ | async)?.role || (user$ | async)?.role === 'USER') {
         <li class="nav-item">
           <a
             class="nav-link"
             routerLink="/"
             routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
             (click)="closeMenu()"
             >Home</a
           >
         </li>
+        }
+        @if (!(user$ | async)?.role || (user$ | async)?.role === 'USER') {
         <li class="nav-item">
           <a
             class="nav-link"
@@ -40,7 +44,9 @@
             >Créer</a
           >
         </li>
+        }
         @if (user$ | async; as user) {
+        @if (user.role === 'USER') {
         <li class="nav-item">
           <a
             class="nav-link"
@@ -50,6 +56,7 @@
             >Profil</a
           >
         </li>
+        }
         @if (user.role === 'ADMIN') {
         <li class="nav-item">
           <a

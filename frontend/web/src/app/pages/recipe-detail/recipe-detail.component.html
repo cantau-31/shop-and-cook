@@ -17,6 +17,7 @@
         <span>Difficulté : {{ r.difficulty | difficultyLabel }}</span>
         <span>Note : ★ {{ r.rating | number : "1.1-1" }}</span>
       </div>
+      @if (isAuthenticated) {
       <div class="d-flex gap-2 flex-wrap">
         <button class="btn btn-warning text-dark" (click)="toggleFavorite()">
           {{ r.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris" }}
@@ -37,6 +38,7 @@
           }
         </div>
       </div>
+      }
     </div>
   </div>
 
