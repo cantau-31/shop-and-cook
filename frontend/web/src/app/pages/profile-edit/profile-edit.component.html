@@ -1,0 +1,36 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Éditer le profil</h3>
+            <a class="btn btn-outline-secondary btn-sm" routerLink="/profile">Retour</a>
+          </div>
+          <p class="text-muted">
+            Modifiez vos informations visibles sur votre profil.
+          </p>
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="mb-3">
+              <label class="form-label">Nom d'utilisateur</label>
+              <input type="text" class="form-control" formControlName="displayName" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" formControlName="email" />
+            </div>
+            @if (error) {
+              <div class="alert alert-danger">{{ error }}</div>
+            }
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting">
+                {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+              <a class="btn btn-outline-secondary" routerLink="/profile">Annuler</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
