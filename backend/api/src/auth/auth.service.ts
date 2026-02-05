@@ -1,13 +1,19 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm';
+import { randomBytes, createHash } from 'crypto';
 
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TokenPayload } from './auth.constants';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +23,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @InjectRepository(PasswordResetToken)
+    private readonly resetTokenRepo: Repository<PasswordResetToken>,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -76,8 +84,39 @@ export class AuthService {
   async requestPasswordReset(dto: ForgotPasswordDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (user) {
-      this.logger.log(`Password reset requested for ${user.email}`);
+      const token = await this.createResetToken(user);
+      this.logger.log(`Password reset token for ${user.email}: ${token}`);
+      return { success: true, resetToken: token };
     }
+    return { success: true };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const hashed = createHash('sha256').update(dto.token).digest('hex');
+    const resetToken = await this.resetTokenRepo.findOne({
+      where: { tokenHash: hashed },
+      relations: ['user']
+    });
+
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+      throw new BadRequestException({
+        code: 'ERR_INVALID_RESET_TOKEN',
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(
+      dto.password,
+      this.configService.get<number>('auth.bcryptSaltRounds', 11)
+    );
+
+    await Promise.all([
+      this.usersService.updatePassword(resetToken.userId, passwordHash),
+      this.resetTokenRepo.update(resetToken.id, { usedAt: new Date() })
+    ]);
+
+    this.logger.log(`Password reset completed for ${resetToken.user.email}`);
+
     return { success: true };
   }
 
@@ -123,5 +162,21 @@ export class AuthService {
     });
 
     return { accessToken, refreshToken };
+  }
+
+  private async createResetToken(user: User) {
+    await this.resetTokenRepo.delete({ userId: user.id });
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    const entity = this.resetTokenRepo.create({
+      userId: user.id,
+      tokenHash,
+      expiresAt
+    });
+    await this.resetTokenRepo.save(entity);
+
+    return rawToken;
   }
 }

@@ -23,6 +23,7 @@ import { RatingsModule } from './ratings/ratings.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { CategoriesModule } from './categories/categories.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
+import { PasswordResetToken } from './auth/entities/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { IngredientsModule } from './ingredients/ingredients.module';
         username: process.env.DB_USER ?? 'root',
         password: process.env.DB_PASS ?? '',
         database: process.env.DB_NAME ?? 'shopcook',
-        entities: [User, Category, Ingredient, Recipe, RecipeIngredient, Rating, Comment, Favorite],
+        entities: [User, Category, Ingredient, Recipe, RecipeIngredient, Rating, Comment, Favorite, PasswordResetToken],
         synchronize: false,
         logging: false
       })
