@@ -84,6 +84,7 @@ export class RecipesService {
     }
     return recipe;
   }
+  
 
   async create(author: User, dto: CreateRecipeDto) {
     this.ensurePublishable(dto.steps, dto.ingredients);
@@ -324,13 +325,21 @@ export class RecipesService {
       for (const item of items) {
         let ingredientId = item.ingredientId;
         if (!ingredientId && item.name) {
-          const newIngredient = await manager.save(
-            this.ingredientRepo.create({
-              name: item.name,
-              unitDefault: item.unit,
-            }),
-          );
-          ingredientId = Number(newIngredient.id);
+          const ingredientRepo = manager.getRepository(Ingredient);
+          const existing = await ingredientRepo.findOne({
+            where: { name: item.name },
+          });
+          if (existing) {
+            ingredientId = Number(existing.id);
+          } else {
+            const newIngredient = await ingredientRepo.save(
+              ingredientRepo.create({
+                name: item.name,
+                unitDefault: item.unit,
+              }),
+            );
+            ingredientId = Number(newIngredient.id);
+          }
         }
 
         if (!ingredientId) {
