@@ -23,7 +23,7 @@ async function bootstrap() {
     app.use(helmet());
     app.enableCors({
       origin: '*',
-      credentials: true
+      credentials: true,
     });
     app.use(json({ limit: '1mb' }));
     app.use(urlencoded({ extended: true }));
@@ -31,8 +31,8 @@ async function bootstrap() {
       new ValidationPipe({
         whitelist: true,
         transform: true,
-        forbidNonWhitelisted: true
-      })
+        forbidNonWhitelisted: true,
+      }),
     );
     app.useGlobalFilters(new HttpExceptionFilter());
     app.setGlobalPrefix('api/v1');
