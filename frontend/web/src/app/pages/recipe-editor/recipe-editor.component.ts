@@ -71,7 +71,7 @@ export class RecipeEditorComponent implements OnInit {
     private recipeService: RecipeService,
     private router: Router,
     private route: ActivatedRoute,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
   ) {}
 
   ngOnInit(): void {
@@ -149,7 +149,8 @@ export class RecipeEditorComponent implements OnInit {
       next: (recipe) => {
         const derivedDuration =
           (recipe.durationMinutes ??
-            (Number(recipe.prepMinutes ?? 0) + Number(recipe.cookMinutes ?? 0))) ||
+            Number(recipe.prepMinutes ?? 0) +
+              Number(recipe.cookMinutes ?? 0)) ||
           30;
 
         this.recipeForm.patchValue({
@@ -174,18 +175,18 @@ export class RecipeEditorComponent implements OnInit {
                   [Validators.required, Validators.min(0.1)],
                 ],
                 unit: [ingredient.unit, Validators.required],
-              })
-            )
-          )
+              }),
+            ),
+          ),
         );
 
         this.recipeForm.setControl(
           'steps',
           this.fb.array<FormControl<string>>(
             recipe.steps.map((step) =>
-              this.fb.nonNullable.control(step, Validators.required)
-            )
-          )
+              this.fb.nonNullable.control(step, Validators.required),
+            ),
+          ),
         );
       },
     });
@@ -206,9 +207,12 @@ export class RecipeEditorComponent implements OnInit {
     const prepMinutes = Math.max(Math.floor(totalMinutes / 2), 0);
     const cookMinutes = Math.max(totalMinutes - prepMinutes, 0);
     const categoryValue = (formValue.category ?? '').toString().trim();
-    const parsedCategory = categoryValue === '' ? undefined : Number(categoryValue);
+    const parsedCategory =
+      categoryValue === '' ? undefined : Number(categoryValue);
     const categoryIdNumber =
-      parsedCategory !== undefined && Number.isFinite(parsedCategory) ? parsedCategory : undefined;
+      parsedCategory !== undefined && Number.isFinite(parsedCategory)
+        ? parsedCategory
+        : undefined;
 
     return {
       title: formValue.title,

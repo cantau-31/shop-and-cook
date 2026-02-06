@@ -18,13 +18,17 @@
               <select class="form-select" formControlName="category">
                 <option value="">Sans catégorie</option>
                 @for (category of categories; track category.id) {
-                <option [value]="category.id">{{ category.name }}</option>
+                  <option [value]="category.id">{{ category.name }}</option>
                 }
               </select>
             </div>
             <div class="col-6 col-md-3">
               <label class="form-label">Portions</label>
-              <input type="number" class="form-control" formControlName="servings" />
+              <input
+                type="number"
+                class="form-control"
+                formControlName="servings"
+              />
             </div>
             <div class="col-6 col-md-3">
               <label class="form-label">Durée (min)</label>
@@ -38,9 +42,9 @@
               <label class="form-label">Difficulté</label>
               <select class="form-select" formControlName="difficulty">
                 @for (difficulty of difficulties; track difficulty.value) {
-                <option [value]="difficulty.value">
-                  {{ difficulty.label }}
-                </option>
+                  <option [value]="difficulty.value">
+                    {{ difficulty.label }}
+                  </option>
                 }
               </select>
             </div>
@@ -69,11 +73,12 @@
                   id="isPublished"
                 />
                 <label class="form-check-label" for="isPublished">
-                  Publier cette recette (visible par tous)
+                  Publier cette recette
                 </label>
               </div>
               <small class="text-muted">
-                Si décoché, la recette restera en brouillon et sera visible uniquement par vous
+                Si décoché, la recette restera en brouillon et sera visible
+                uniquement par vous
               </small>
             </div>
           </div>
@@ -94,24 +99,24 @@
           </div>
 
           @for (step of steps.controls; track $index) {
-          <div class="step-item mb-3">
-            <label class="form-label">Étape {{ $index + 1 }}</label>
-            <div class="d-flex gap-2">
-              <textarea
-                rows="2"
-                class="form-control"
-                [formControl]="step"
-              ></textarea>
-              <button
-                type="button"
-                class="btn btn-outline-danger"
-                (click)="removeStep($index)"
-                [disabled]="steps.length === 1"
-              >
-                &times;
-              </button>
+            <div class="step-item mb-3">
+              <label class="form-label">Étape {{ $index + 1 }}</label>
+              <div class="d-flex gap-2">
+                <textarea
+                  rows="2"
+                  class="form-control"
+                  [formControl]="step"
+                ></textarea>
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  (click)="removeStep($index)"
+                  [disabled]="steps.length === 1"
+                >
+                  &times;
+                </button>
+              </div>
             </div>
-          </div>
           }
         </div>
       </div>
@@ -131,37 +136,37 @@
             </button>
           </div>
           @for (ingredient of ingredients.controls; track $index) {
-          <div [formGroup]="ingredient" class="ingredient-item mb-3">
-            <label class="form-label">Ingrédient {{ $index + 1 }}</label>
-            <input
-              type="text"
-              class="form-control mb-2"
-              formControlName="name"
-              placeholder="Nom"
-            />
-            <div class="d-flex gap-2">
-              <input
-                type="number"
-                class="form-control"
-                formControlName="quantity"
-                placeholder="Quantité"
-              />
+            <div [formGroup]="ingredient" class="ingredient-item mb-3">
+              <label class="form-label">Ingrédient {{ $index + 1 }}</label>
               <input
                 type="text"
-                class="form-control"
-                formControlName="unit"
-                placeholder="Unité"
+                class="form-control mb-2"
+                formControlName="name"
+                placeholder="Nom"
               />
-              <button
-                type="button"
-                class="btn btn-outline-danger"
-                (click)="removeIngredient($index)"
-                [disabled]="ingredients.length === 1"
-              >
-                &times;
-              </button>
+              <div class="d-flex gap-2">
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="quantity"
+                  placeholder="Quantité"
+                />
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="unit"
+                  placeholder="Unité"
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  (click)="removeIngredient($index)"
+                  [disabled]="ingredients.length === 1"
+                >
+                  &times;
+                </button>
+              </div>
             </div>
-          </div>
           }
         </div>
       </div>
