@@ -50,7 +50,13 @@ export class RecipesService {
         { id: idOrSlug, isPublished: true, hiddenAt: IsNull() },
         { slug: idOrSlug, isPublished: true, hiddenAt: IsNull() },
       ],
-      relations: ['category', 'ingredients', 'ingredients.ingredient', 'ratings', 'author'],
+      relations: [
+        'category',
+        'ingredients',
+        'ingredients.ingredient',
+        'ratings',
+        'author',
+      ],
     });
 
     if (!recipe) {
@@ -84,7 +90,39 @@ export class RecipesService {
     }
     return recipe;
   }
-  
+
+  async findByIdWithRelations(id: string) {
+    const recipe = await this.recipeRepo.findOne({
+      where: { id },
+      relations: [
+        'category',
+        'ingredients',
+        'ingredients.ingredient',
+        'ratings',
+        'author',
+      ],
+    });
+
+    if (!recipe) {
+      throw new NotFoundException({
+        code: 'ERR_RECIPE_NOT_FOUND',
+        message: 'Recipe not found',
+      });
+    }
+
+    const average =
+      recipe.ratings?.length && recipe.ratings.length > 0
+        ? recipe.ratings.reduce((sum, rating) => sum + rating.stars, 0) /
+          recipe.ratings.length
+        : 0;
+
+    return {
+      ...recipe,
+      averageRating: average,
+      ratingCount: recipe.ratings?.length ?? 0,
+      rating: average,
+    };
+  }
 
   async create(author: User, dto: CreateRecipeDto) {
     this.ensurePublishable(dto.steps, dto.ingredients);
@@ -106,7 +144,7 @@ export class RecipesService {
 
     const saved = await this.recipeRepo.save(recipe);
     await this.syncIngredients(saved.id, dto.ingredients);
-    return this.findPublicByIdOrSlug(saved.id);
+    return this.findByIdWithRelations(saved.id);
   }
 
   async update(recipeId: string, user: User, dto: UpdateRecipeDto) {
@@ -144,7 +182,7 @@ export class RecipesService {
       await this.syncIngredients(recipe.id, dto.ingredients);
     }
 
-    return this.findPublicByIdOrSlug(recipe.id);
+    return this.findByIdWithRelations(recipe.id);
   }
 
   async hide(recipeId: string) {
@@ -163,7 +201,7 @@ export class RecipesService {
     this.ensureOwnership(recipe, user);
     this.ensurePublishable(recipe.steps, ingredients);
     await this.syncIngredients(recipeId, ingredients);
-    return this.findPublicByIdOrSlug(recipe.id);
+    return this.findByIdWithRelations(recipe.id);
   }
 
   private buildListQuery(
@@ -188,7 +226,10 @@ export class RecipesService {
     return baseQb;
   }
 
-  private applyFilters(builder: SelectQueryBuilder<Recipe>, query: FindRecipesQueryDto) {
+  private applyFilters(
+    builder: SelectQueryBuilder<Recipe>,
+    query: FindRecipesQueryDto,
+  ) {
     if (query.q) {
       builder.andWhere('LOWER(recipe.title) LIKE :q', {
         q: `%${query.q.toLowerCase()}%`,
