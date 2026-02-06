@@ -142,9 +142,9 @@ export class RecipesService {
   }
 
   async findOwnById(id: string, user: User) {
-    const recipe = await this.findByIdWithRelations(id);
-    this.ensureOwnership(recipe, user);
-    return recipe;
+    const entity = await this.findEntity(id);
+    this.ensureOwnership(entity, user);
+    return this.findByIdWithRelations(id);
   }
 
   async create(author: User, dto: CreateRecipeDto) {
