@@ -145,7 +145,7 @@ export class RecipeEditorComponent implements OnInit {
   }
 
   private loadRecipe(id: string): void {
-    this.recipeService.getRecipeById(id).subscribe({
+    this.recipeService.getRecipeForEdit(id).subscribe({
       next: (recipe) => {
         const derivedDuration =
           (recipe.durationMinutes ??

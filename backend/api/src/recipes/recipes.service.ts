@@ -44,12 +44,29 @@ export class RecipesService {
     return this.executeListQuery(baseQb, query);
   }
 
-  async findPublicByIdOrSlug(idOrSlug: string) {
+  async findAllForCurrentUser(user: User, query: FindRecipesQueryDto) {
+    const baseQb = this.buildListQuery(
+      { ...query, authorId: String(user.id) },
+      { requirePublished: false, requireVisible: true },
+    );
+    return this.executeListQuery(baseQb, query);
+  }
+
+  async findPublicByIdOrSlug(idOrSlug: string, currentUserId?: string) {
+    const where: any[] = [
+      { id: idOrSlug, isPublished: true, hiddenAt: IsNull() },
+      { slug: idOrSlug, isPublished: true, hiddenAt: IsNull() },
+    ];
+
+    if (currentUserId) {
+      where.push(
+        { id: idOrSlug, authorId: currentUserId, hiddenAt: IsNull() },
+        { slug: idOrSlug, authorId: currentUserId, hiddenAt: IsNull() },
+      );
+    }
+
     const recipe = await this.recipeRepo.findOne({
-      where: [
-        { id: idOrSlug, isPublished: true, hiddenAt: IsNull() },
-        { slug: idOrSlug, isPublished: true, hiddenAt: IsNull() },
-      ],
+      where,
       relations: [
         'category',
         'ingredients',
@@ -122,6 +139,12 @@ export class RecipesService {
       ratingCount: recipe.ratings?.length ?? 0,
       rating: average,
     };
+  }
+
+  async findOwnById(id: string, user: User) {
+    const recipe = await this.findByIdWithRelations(id);
+    this.ensureOwnership(recipe, user);
+    return recipe;
   }
 
   async create(author: User, dto: CreateRecipeDto) {

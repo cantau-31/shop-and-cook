@@ -15,7 +15,7 @@ import { LoadingSpinnerComponent } from '../../components/loading-spinner/loadin
   standalone: true,
   imports: [CommonModule, RouterLink, LoadingSpinnerComponent],
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss']
+  styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnInit {
   user: User | null = null;
@@ -27,7 +27,7 @@ export class ProfileComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private recipeService: RecipeService,
-    private notifications: NotificationService
+    private notifications: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -57,9 +57,11 @@ export class ProfileComponent implements OnInit {
   removeFavorite(recipeId: string): void {
     this.recipeService.toggleFavorite(recipeId, false).subscribe({
       next: () => {
-        this.favorites = this.favorites.filter((recipe) => recipe.id !== recipeId);
+        this.favorites = this.favorites.filter(
+          (recipe) => recipe.id !== recipeId,
+        );
         this.notifications.success('Favori retiré');
-      }
+      },
     });
   }
 
@@ -69,15 +71,17 @@ export class ProfileComponent implements OnInit {
     }
     this.recipeService.deleteRecipe(recipeId).subscribe({
       next: () => {
-        this.myRecipes = this.myRecipes.filter((recipe) => recipe.id !== recipeId);
+        this.myRecipes = this.myRecipes.filter(
+          (recipe) => recipe.id !== recipeId,
+        );
         this.notifications.success('Recette supprimée');
-      }
+      },
     });
   }
 
   private loadMyRecipes(userId: string): void {
     this.loadingRecipes = true;
-    this.recipeService.getRecipes({ authorId: userId, limit: 20 }).subscribe({
+    this.recipeService.getMyRecipes({ limit: 20 }).subscribe({
       next: (response: PaginatedResponse<Recipe>) =>
         (this.myRecipes = response.items),
       error: () => {

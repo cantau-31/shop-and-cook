@@ -8,13 +8,14 @@ import {
   Post,
   Put,
   Query,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { AccessTokenGuard } from '../common/guards/access-token.guard';
+import { OptionalAccessTokenGuard } from '../common/guards/optional-access-token.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CreateRecipeDto, UpdateRecipeDto } from './dto/create-recipe.dto';
 import { FindRecipesQueryDto } from './dto/find-recipes-query.dto';
@@ -39,9 +40,24 @@ export class RecipesController {
     return this.recipesService.findAllForAdmin(query);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Get('mine')
+  findMine(@CurrentUser() user: any, @Query() query: FindRecipesQueryDto) {
+    return this.recipesService.findAllForCurrentUser(user, query);
+  }
+
+  @UseGuards(OptionalAccessTokenGuard)
   @Get(':idOrSlug')
-  findOne(@Param('idOrSlug') idOrSlug: string) {
-    return this.recipesService.findPublicByIdOrSlug(idOrSlug);
+  findOne(@Param('idOrSlug') idOrSlug: string, @CurrentUser() user: any) {
+    return this.recipesService.findPublicByIdOrSlug(idOrSlug, user?.id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Get(':id/edit')
+  findOneForEdit(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.recipesService.findOwnById(id, user);
   }
 
   @ApiBearerAuth()
@@ -54,7 +70,11 @@ export class RecipesController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Put(':id')
-  update(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: UpdateRecipeDto) {
+  update(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Body() dto: UpdateRecipeDto,
+  ) {
     return this.recipesService.update(id, user, dto);
   }
 
@@ -64,7 +84,7 @@ export class RecipesController {
   updateIngredients(
     @Param('id') id: string,
     @CurrentUser() user: any,
-    @Body() items: UpsertIngredientDto[]
+    @Body() items: UpsertIngredientDto[],
   ) {
     return this.recipesService.replaceIngredients(id, user, items);
   }

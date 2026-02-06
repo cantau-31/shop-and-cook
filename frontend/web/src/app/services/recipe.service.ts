@@ -37,18 +37,23 @@ interface RecipeApi {
   steps_json?: string;
   hiddenAt?: string | null;
   hidden_at?: string | null;
+  isPublished?: boolean;
+  is_published?: boolean;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RecipeService {
   private readonly baseUrl = environment.apiUrl;
-  private readonly placeholderImage = 'https://placehold.co/600x400?text=Shop+%26+Cook';
+  private readonly placeholderImage =
+    'https://placehold.co/600x400?text=Shop+%26+Cook';
 
   constructor(private http: HttpClient) {}
 
-  getRecipes(filters: RecipeQueryParams = {}): Observable<PaginatedResponse<Recipe>> {
+  getRecipes(
+    filters: RecipeQueryParams = {},
+  ): Observable<PaginatedResponse<Recipe>> {
     let params = new HttpParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -61,12 +66,14 @@ export class RecipeService {
       .pipe(
         map((response) => ({
           ...response,
-          items: (response.items || []).map((item) => this.mapRecipe(item))
-        }))
+          items: (response.items || []).map((item) => this.mapRecipe(item)),
+        })),
       );
   }
 
-  getAdminRecipes(filters: RecipeQueryParams = {}): Observable<PaginatedResponse<Recipe>> {
+  getAdminRecipes(
+    filters: RecipeQueryParams = {},
+  ): Observable<PaginatedResponse<Recipe>> {
     let params = new HttpParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -75,12 +82,14 @@ export class RecipeService {
     });
 
     return this.http
-      .get<PaginatedResponse<RecipeApi>>(`${this.baseUrl}/recipes/admin`, { params })
+      .get<
+        PaginatedResponse<RecipeApi>
+      >(`${this.baseUrl}/recipes/admin`, { params })
       .pipe(
         map((response) => ({
           ...response,
-          items: (response.items || []).map((item) => this.mapRecipe(item))
-        }))
+          items: (response.items || []).map((item) => this.mapRecipe(item)),
+        })),
       );
   }
 
@@ -88,6 +97,34 @@ export class RecipeService {
     return this.http
       .get<RecipeApi>(`${this.baseUrl}/recipes/${id}`)
       .pipe(map((recipe) => this.mapRecipe(recipe)));
+  }
+
+  getRecipeForEdit(id: string): Observable<Recipe> {
+    return this.http
+      .get<RecipeApi>(`${this.baseUrl}/recipes/${id}/edit`)
+      .pipe(map((recipe) => this.mapRecipe(recipe)));
+  }
+
+  getMyRecipes(
+    filters: RecipeQueryParams = {},
+  ): Observable<PaginatedResponse<Recipe>> {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+
+    return this.http
+      .get<
+        PaginatedResponse<RecipeApi>
+      >(`${this.baseUrl}/recipes/mine`, { params })
+      .pipe(
+        map((response) => ({
+          ...response,
+          items: (response.items || []).map((item) => this.mapRecipe(item)),
+        })),
+      );
   }
 
   createRecipe(payload: Partial<Recipe>): Observable<Recipe> {
@@ -106,22 +143,32 @@ export class RecipeService {
     return this.http.delete<void>(`${this.baseUrl}/recipes/${id}`);
   }
 
-  toggleRecipeVisibility(id: string): Observable<{ success: boolean; hiddenAt?: string }> {
+  toggleRecipeVisibility(
+    id: string,
+  ): Observable<{ success: boolean; hiddenAt?: string }> {
     return this.http.patch<{ success: boolean; hiddenAt?: string }>(
       `${this.baseUrl}/recipes/admin/${id}/hide`,
-      {}
+      {},
     );
   }
 
-  rateRecipe(id: string, rating: number): Observable<{ stars: number; average: number }> {
-    return this.http.post<{ stars: number; average: number }>(`${this.baseUrl}/recipes/${id}/rating`, {
-      stars: rating
-    });
+  rateRecipe(
+    id: string,
+    rating: number,
+  ): Observable<{ stars: number; average: number }> {
+    return this.http.post<{ stars: number; average: number }>(
+      `${this.baseUrl}/recipes/${id}/rating`,
+      {
+        stars: rating,
+      },
+    );
   }
 
   toggleFavorite(id: string, shouldFavorite: boolean): Observable<void> {
     const url = `${this.baseUrl}/recipes/${id}/favorite`;
-    return shouldFavorite ? this.http.post<void>(url, {}) : this.http.delete<void>(url);
+    return shouldFavorite
+      ? this.http.post<void>(url, {})
+      : this.http.delete<void>(url);
   }
 
   getFavorites(): Observable<Recipe[]> {
@@ -137,13 +184,13 @@ export class RecipeService {
     const categoryName =
       typeof api.category === 'string'
         ? api.category
-        : api.category?.name ?? '';
+        : (api.category?.name ?? '');
     const categoryId =
       typeof api.categoryId !== 'undefined'
         ? api.categoryId
         : typeof api.category === 'object'
-        ? api.category?.id
-        : null;
+          ? api.category?.id
+          : null;
     const imageUrl = this.normalizeImageUrl(api.coverUrl ?? api.imageUrl);
 
     return {
@@ -170,11 +217,12 @@ export class RecipeService {
         api.ingredients?.map((item) => ({
           name: item.ingredient?.name ?? item.name ?? '',
           quantity: item.quantity ?? 0,
-          unit: item.unit ?? item.ingredient?.unitDefault ?? ''
+          unit: item.unit ?? item.ingredient?.unitDefault ?? '',
         })) ?? [],
       steps: this.resolveSteps(api.steps ?? api.steps_json),
       comments: [],
-      hiddenAt: api.hiddenAt ?? api.hidden_at ?? null
+      hiddenAt: api.hiddenAt ?? api.hidden_at ?? null,
+      isPublished: api.isPublished ?? api.is_published ?? true,
     };
   }
 
@@ -202,7 +250,7 @@ export class RecipeService {
     const map: Record<string, number> = {
       easy: 1,
       medium: 3,
-      hard: 5
+      hard: 5,
     };
     return map[normalized] ?? 1;
   }
