@@ -29,6 +29,7 @@ type RecipeFormGroup = FormGroup<{
   difficulty: FormControl<string>;
   imageUrl: FormControl<string>;
   description: FormControl<string>;
+  isPublished: FormControl<boolean>;
   ingredients: FormArray<IngredientFormGroup>;
   steps: FormArray<FormControl<string>>;
 }>;
@@ -58,6 +59,7 @@ export class RecipeEditorComponent implements OnInit {
     difficulty: ['easy', Validators.required],
     imageUrl: ['', Validators.required],
     description: [''],
+    isPublished: [true],
     ingredients: this.fb.array<IngredientFormGroup>([
       this.createIngredientGroup(),
     ]),
@@ -158,6 +160,7 @@ export class RecipeEditorComponent implements OnInit {
           difficulty: this.normalizeDifficulty(recipe.difficulty),
           imageUrl: recipe.coverUrl ?? recipe.imageUrl ?? '',
           description: recipe.description ?? '',
+          isPublished: recipe.isPublished ?? true,
         });
 
         this.recipeForm.setControl(
@@ -215,7 +218,7 @@ export class RecipeEditorComponent implements OnInit {
       cookMinutes,
       difficulty: this.difficultyToNumber(formValue.difficulty),
       coverUrl: formValue.imageUrl || undefined,
-      isPublished: true,
+      isPublished: formValue.isPublished ?? true,
       ingredients: formValue.ingredients.map((ingredient) => ({
         name: ingredient.name,
         quantity: Number(ingredient.quantity),

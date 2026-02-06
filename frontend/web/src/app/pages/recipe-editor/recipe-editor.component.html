@@ -60,6 +60,22 @@
                 formControlName="description"
               ></textarea>
             </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  formControlName="isPublished"
+                  id="isPublished"
+                />
+                <label class="form-check-label" for="isPublished">
+                  Publier cette recette (visible par tous)
+                </label>
+              </div>
+              <small class="text-muted">
+                Si décoché, la recette restera en brouillon et sera visible uniquement par vous
+              </small>
+            </div>
           </div>
         </div>
       </div>

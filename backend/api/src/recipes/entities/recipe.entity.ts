@@ -51,13 +51,13 @@ export class Recipe {
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   difficulty!: number;
 
-  @Column({ 
-    name: 'steps_json', 
+  @Column({
+    name: 'steps_json',
     type: 'text',
     transformer: {
       to: (value: string[]) => JSON.stringify(value),
-      from: (value: string) => JSON.parse(value)
-    }
+      from: (value: string) => JSON.parse(value),
+    },
   })
   steps!: string[];
 
@@ -90,9 +90,9 @@ export class Recipe {
     this.createdAt = new Date();
   }
 
-  @Column({ 
-    name: 'updated_at', 
-    type: 'datetime'
+  @Column({
+    name: 'updated_at',
+    type: 'datetime',
   })
   updatedAt!: Date;
 
