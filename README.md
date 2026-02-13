@@ -80,14 +80,6 @@ JWT_SECRET=supersecret
 API_URL=http://localhost:3000/api/v1
 ```
 
----
-
-## Tests
-
-* **Tests unitaires** : `npm run test`
-* **Tests end-to-end** : `npm run e2e`
-
----
 
 ## Déploiement
 
@@ -103,9 +95,3 @@ API_URL=http://localhost:3000/api/v1
 Développeur Full Stack
 
 ---
-
-Si tu veux, je peux aussi :
-
-* le rendre **plus académique** (pour un dossier scolaire),
-* **plus marketing** (portfolio / recruteur),
-* ou **plus technique** (orienté dev senior).
