@@ -21,6 +21,13 @@
               <label class="form-label">Confirmer le mot de passe</label>
               <input type="password" class="form-control" formControlName="confirmPassword" />
             </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="privacyAccepted" formControlName="privacyAccepted" />
+              <label class="form-check-label" for="privacyAccepted">
+                J'accepte la
+                <a routerLink="/privacy-policy">politique de confidentialité</a>.
+              </label>
+            </div>
             @if (form.hasError('passwordsMismatch') && form.get('confirmPassword')?.touched) {
             <div class="text-danger small mb-3">Les mots de passe ne correspondent pas.</div>
             }

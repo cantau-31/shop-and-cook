@@ -12,6 +12,8 @@ export interface LoginPayload {
 
 export interface RegisterPayload extends LoginPayload {
   displayName: string;
+  privacyAccepted: boolean;
+  privacyPolicyVersion: string;
 }
 
 export interface ResetPasswordPayload {

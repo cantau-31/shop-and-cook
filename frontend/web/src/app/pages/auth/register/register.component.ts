@@ -19,6 +19,7 @@ import { AuthService, RegisterPayload } from '../../../services/auth.service';
   styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
+  private readonly privacyPolicyVersion = 'v1.0';
   isSubmitting = false;
 
   form = this.fb.group(
@@ -26,7 +27,8 @@ export class RegisterComponent {
       displayName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
+      privacyAccepted: [false, [Validators.requiredTrue]]
     },
     { validators: [RegisterComponent.passwordsMatch] }
   );
@@ -43,8 +45,14 @@ export class RegisterComponent {
     }
     this.isSubmitting = true;
 
-    const { displayName, email, password } = this.form.value;
-    this.authService.register({ displayName, email, password } as RegisterPayload).subscribe({
+    const { displayName, email, password, privacyAccepted } = this.form.value;
+    this.authService.register({
+      displayName,
+      email,
+      password,
+      privacyAccepted: Boolean(privacyAccepted),
+      privacyPolicyVersion: this.privacyPolicyVersion
+    } as RegisterPayload).subscribe({
       next: () => this.router.navigate(['/']),
       error: () => (this.isSubmitting = false),
     });
