@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { PaginatedResponse } from '../../models/pagination.model';
 import { Recipe } from '../../models/recipe.model';
@@ -8,6 +8,7 @@ import { User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import { RecipeService } from '../../services/recipe.service';
 import { NotificationService } from '../../services/notification.service';
+import { UserService } from '../../services/user.service';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 
 @Component({
@@ -27,6 +28,8 @@ export class ProfileComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private recipeService: RecipeService,
+    private userService: UserService,
+    private router: Router,
     private notifications: NotificationService,
   ) {}
 
@@ -88,6 +91,37 @@ export class ProfileComponent implements OnInit {
         this.loadingRecipes = false;
       },
       complete: () => (this.loadingRecipes = false),
+    });
+  }
+
+  exportMyData(): void {
+    this.userService.exportMyData().subscribe({
+      next: (payload) => {
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
+          type: 'application/json;charset=utf-8',
+        });
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `shop-and-cook-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+        this.notifications.success('Export RGPD prêt');
+      },
+    });
+  }
+
+  deleteMyAccount(): void {
+    if (!confirm('Confirmer la suppression définitive de votre compte et de vos données ?')) {
+      return;
+    }
+
+    this.userService.deleteMyAccount().subscribe({
+      next: () => {
+        this.authService.logout();
+        this.notifications.success('Compte supprimé');
+        this.router.navigate(['/']);
+      },
     });
   }
 }

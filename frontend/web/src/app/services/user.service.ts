@@ -38,6 +38,43 @@ interface ProfileUserApi {
   role?: 'USER' | 'ADMIN';
 }
 
+export interface UserDataExport {
+  exportedAt: string;
+  user: {
+    id: string;
+    email: string;
+    displayName: string;
+    role: 'USER' | 'ADMIN';
+    createdAt: string;
+    privacyAcceptedAt: string | null;
+    privacyPolicyVersion: string | null;
+  };
+  recipes: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    isPublished: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  comments: Array<{
+    id: string;
+    recipeId: string;
+    body: string;
+    createdAt: string;
+  }>;
+  ratings: Array<{
+    id: string;
+    recipeId: string;
+    stars: number;
+    createdAt: string;
+  }>;
+  favorites: Array<{
+    recipeId: string;
+    createdAt: string;
+  }>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -77,6 +114,14 @@ export class UserService {
         role: api.role ?? 'USER',
       }))
     );
+  }
+
+  exportMyData(): Observable<UserDataExport> {
+    return this.http.get<UserDataExport>(`${this.baseUrl}/me/export`);
+  }
+
+  deleteMyAccount(): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.baseUrl}/me`);
   }
 
   private mapAdminUser = (api: AdminUserApi): AdminUser => ({
