@@ -21,8 +21,12 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
     app.use(helmet());
+    const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
     app.enableCors({
-      origin: '*',
+      origin: allowedOrigins,
       credentials: true,
     });
     app.use(json({ limit: '1mb' }));
