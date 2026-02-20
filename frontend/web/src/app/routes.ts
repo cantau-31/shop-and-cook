@@ -7,6 +7,8 @@ import { LoginComponent } from './pages/auth/login/login.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { HomeComponent } from './pages/home/home.component';
+import { CookiesPolicyComponent } from './pages/legal/cookies-policy/cookies-policy.component';
+import { PrivacyPolicyComponent } from './pages/legal/privacy-policy/privacy-policy.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileEditComponent } from './pages/profile-edit/profile-edit.component';
 import { RecipeDetailComponent } from './pages/recipe-detail/recipe-detail.component';
@@ -49,5 +51,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  { path: 'cookies', component: CookiesPolicyComponent },
   { path: '**', redirectTo: '' },
 ];
