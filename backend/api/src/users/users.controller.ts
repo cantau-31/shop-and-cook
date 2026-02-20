@@ -34,6 +34,16 @@ export class UsersController {
     return this.usersService.updateProfile(user.id, dto);
   }
 
+  @Get('me/export')
+  exportMe(@CurrentUser() user: any) {
+    return this.usersService.exportOwnData(user.id);
+  }
+
+  @Delete('me')
+  deleteMe(@CurrentUser() user: any) {
+    return this.usersService.deleteOwnAccount(user.id);
+  }
+
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Get('admin/users')
