@@ -35,6 +35,12 @@ export class User {
   @Column({ name: 'blocked_at', type: 'datetime', nullable: true })
   blockedAt?: Date | null;
 
+  @Column({ name: 'privacy_accepted_at', type: 'datetime', nullable: true })
+  privacyAcceptedAt?: Date | null;
+
+  @Column({ name: 'privacy_policy_version', length: 32, nullable: true })
+  privacyPolicyVersion?: string | null;
+
   @Column({
     name: 'created_at',
     type: 'datetime',
