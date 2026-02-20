@@ -45,6 +45,8 @@ export class AuthService {
       email: dto.email,
       passwordHash,
       displayName: dto.displayName,
+      privacyAcceptedAt: new Date(),
+      privacyPolicyVersion: dto.privacyPolicyVersion,
     });
 
     return this.buildAuthResponse(user);
@@ -86,6 +88,9 @@ export class AuthService {
     if (user) {
       const token = await this.createResetToken(user);
       this.logger.log(`Password reset token for ${user.email}: ${token}`);
+      if (process.env.NODE_ENV === 'production') {
+        return { success: true };
+      }
       return { success: true, resetToken: token };
     }
     return { success: true };
