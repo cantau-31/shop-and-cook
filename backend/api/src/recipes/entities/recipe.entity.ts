@@ -54,9 +54,17 @@ export class Recipe {
   @Column({
     name: 'steps_json',
     type: 'text',
+    nullable: true,
     transformer: {
-      to: (value: string[]) => JSON.stringify(value),
-      from: (value: string) => JSON.parse(value),
+      to: (value: string[]) => (value ? JSON.stringify(value) : null),
+      from: (value: string | null) => {
+        if (!value) return [];
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [];
+        }
+      },
     },
   })
   steps!: string[];
