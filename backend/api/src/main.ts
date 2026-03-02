@@ -21,7 +21,8 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
     app.use(helmet());
-    const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
+    const corsOriginsFromEnv = process.env.CORS_ORIGINS ?? process.env.FRONTEND_ORIGIN;
+    const allowedOrigins = (corsOriginsFromEnv ?? 'http://localhost:4200,http://localhost:8888,http://127.0.0.1:8888')
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean);
