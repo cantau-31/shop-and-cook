@@ -38,7 +38,7 @@ export class User {
   @Column({ name: 'privacy_accepted_at', type: 'datetime', nullable: true })
   privacyAcceptedAt?: Date | null;
 
-  @Column({ name: 'privacy_policy_version', length: 32, nullable: true })
+  @Column({ name: 'privacy_policy_version', type: 'varchar', length: 32, nullable: true })
   privacyPolicyVersion?: string | null;
 
   @Column({
