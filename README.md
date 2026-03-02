@@ -12,7 +12,7 @@ Le projet est construit autour d’une architecture moderne et prête pour le d�
 
 | Composant        | Technologie                                 |
 | ---------------- | ------------------------------------------- |
-| Frontend         | Angular 17, TailwindCSS                     |
+| Frontend         | Angular 17, Bootstrap                       |
 | Backend          | NestJS (Node.js, TypeScript)                |
 | Base de données  | MySQL                                       |
 | ORM              | TypeORM                                     |
