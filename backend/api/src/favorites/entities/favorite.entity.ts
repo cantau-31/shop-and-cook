@@ -1,5 +1,4 @@
 import {
-  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
@@ -18,7 +17,7 @@ export class Favorite {
   @PrimaryColumn({ name: 'recipe_id', type: 'bigint', unsigned: true })
   recipeId!: string;
 
-  @Column({
+  @CreateDateColumn({
     name: 'created_at',
     type: 'datetime',
   })
