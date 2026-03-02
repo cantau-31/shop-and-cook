@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,7 +36,7 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
-      throw new UnauthorizedException({
+      throw new ConflictException({
         code: 'ERR_EMAIL_TAKEN',
         message: 'Email already registered',
       });
@@ -100,24 +106,24 @@ export class AuthService {
     const hashed = createHash('sha256').update(dto.token).digest('hex');
     const resetToken = await this.resetTokenRepo.findOne({
       where: { tokenHash: hashed },
-      relations: ['user']
+      relations: ['user'],
     });
 
     if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
       throw new BadRequestException({
         code: 'ERR_INVALID_RESET_TOKEN',
-        message: 'Invalid or expired reset token'
+        message: 'Invalid or expired reset token',
       });
     }
 
     const passwordHash = await bcrypt.hash(
       dto.password,
-      this.configService.get<number>('auth.bcryptSaltRounds', 11)
+      this.configService.get<number>('auth.bcryptSaltRounds', 11),
     );
 
     await Promise.all([
       this.usersService.updatePassword(resetToken.userId, passwordHash),
-      this.resetTokenRepo.update(resetToken.id, { usedAt: new Date() })
+      this.resetTokenRepo.update(resetToken.id, { usedAt: new Date() }),
     ]);
 
     this.logger.log(`Password reset completed for ${resetToken.user.email}`);
@@ -178,7 +184,7 @@ export class AuthService {
     const entity = this.resetTokenRepo.create({
       userId: user.id,
       tokenHash,
-      expiresAt
+      expiresAt,
     });
     await this.resetTokenRepo.save(entity);
 
