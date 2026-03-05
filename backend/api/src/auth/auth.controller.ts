@@ -11,6 +11,7 @@ import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyPasswordDto } from './dto/verify-password.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -60,5 +61,14 @@ export class AuthController {
   @HttpCode(204)
   logout() {
     return;
+  }
+
+  @Post('verify-password')
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(200)
+  verifyPassword(@CurrentUser() user: any, @Body() dto: VerifyPasswordDto) {
+    return this.authService.verifyPassword(user.id, dto.password);
   }
 }

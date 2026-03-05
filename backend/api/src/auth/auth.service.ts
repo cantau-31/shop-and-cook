@@ -78,6 +78,44 @@ export class AuthService {
     return this.buildAuthResponse(user);
   }
 
+  async verifyPassword(userId: string, password: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException({
+        code: 'ERR_INVALID_CREDENTIALS',
+        message: 'Invalid credentials',
+      });
+    }
+
+    if (user.role !== 'ADMIN') {
+      throw new UnauthorizedException({
+        code: 'ERR_FORBIDDEN',
+        message: 'Forbidden',
+      });
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException({
+        code: 'ERR_INVALID_CREDENTIALS',
+        message: 'Invalid credentials',
+      });
+    }
+
+    const adminToken = await this.jwtService.signAsync(
+      { sub: String(user.id), purpose: 'admin-verify' },
+      {
+        secret: this.configService.get<string>(
+          'auth.jwtSecret',
+          'default-secret',
+        ),
+        expiresIn: '30m',
+      },
+    );
+
+    return { success: true, adminToken };
+  }
+
   async refresh(user: TokenPayload) {
     const entity = await this.usersService.findById(user.sub);
     if (!entity) {
