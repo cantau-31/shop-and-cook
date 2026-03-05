@@ -105,6 +105,18 @@ export class CommentsService {
     return { success: true };
   }
 
+  async deleteAdmin(commentId: string) {
+    const comment = await this.repo.findOne({ where: { id: commentId } });
+    if (!comment) {
+      throw new NotFoundException({
+        code: 'ERR_COMMENT_NOT_FOUND',
+        message: 'Comment not found',
+      });
+    }
+    await this.repo.delete({ id: commentId });
+    return { success: true };
+  }
+
   private toPublicComment(comment: Comment & { user?: User }) {
     return {
       id: comment.id,

@@ -336,6 +336,12 @@ export class RecipesService {
     return { success: true };
   }
 
+  async removeAdmin(recipeId: string) {
+    const recipe = await this.findEntity(recipeId);
+    await this.recipeRepo.delete(recipe.id);
+    return { success: true };
+  }
+
   private ensureOwnership(recipe: Recipe, user: User) {
     if (String(recipe.authorId) !== String(user.id) && user.role !== 'ADMIN') {
       throw new ForbiddenException({

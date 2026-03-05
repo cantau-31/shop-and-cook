@@ -59,4 +59,12 @@ export class CommentsController {
   listAdmin(@Query() query: FindAdminCommentsQueryDto) {
     return this.commentsService.listAdmin(query);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete('admin/comments/:id')
+  deleteAdmin(@Param('id') id: string) {
+    return this.commentsService.deleteAdmin(id);
+  }
 }

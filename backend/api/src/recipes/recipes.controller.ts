@@ -103,4 +103,12 @@ export class RecipesController {
   hide(@Param('id') id: string) {
     return this.recipesService.hide(id);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Delete('admin/:id')
+  removeAdmin(@Param('id') id: string) {
+    return this.recipesService.removeAdmin(id);
+  }
 }
