@@ -1,4 +1,13 @@
-import { Controller, Delete, Get, Param, Patch, Query, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Query,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -25,7 +34,7 @@ export class UsersController {
       email: entity?.email,
       displayName: entity?.displayName,
       role: entity?.role,
-      createdAt: entity?.createdAt
+      createdAt: entity?.createdAt,
     };
   }
 
@@ -54,14 +63,18 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Patch('admin/users/:id')
-  updateAdmin(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.updateAdmin(id, dto);
+  updateAdmin(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+    @Body() dto: UpdateUserDto,
+  ) {
+    return this.usersService.updateAdmin(id, user.id, dto);
   }
 
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Delete('admin/users/:id')
-  deleteAdmin(@Param('id') id: string) {
-    return this.usersService.deleteAdmin(id);
+  deleteAdmin(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.usersService.deleteAdmin(id, user.id);
   }
 }

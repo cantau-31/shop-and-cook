@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -95,24 +100,39 @@ export class UsersService {
     const [items, total] = await this.repo.findAndCount({
       order: { createdAt: 'DESC' },
       take: query.limit,
-      skip: (query.page - 1) * query.limit
+      skip: (query.page - 1) * query.limit,
     });
 
     return {
       items: items.map((user) => this.toAdminUser(user)),
       total,
       page: query.page,
-      limit: query.limit
+      limit: query.limit,
     };
   }
 
-  async updateAdmin(id: string, dto: UpdateUserDto) {
+  async updateAdmin(id: string, currentUserId: string, dto: UpdateUserDto) {
     const user = await this.repo.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException({
         code: 'ERR_USER_NOT_FOUND',
-        message: 'User not found'
+        message: 'User not found',
       });
+    }
+
+    if (String(id) === String(currentUserId)) {
+      if (dto.role !== undefined && dto.role !== user.role) {
+        throw new ForbiddenException({
+          code: 'ERR_SELF_DEMOTE',
+          message: 'You cannot change your own role',
+        });
+      }
+      if (dto.blocked === true) {
+        throw new ForbiddenException({
+          code: 'ERR_SELF_BLOCK',
+          message: 'You cannot block your own account',
+        });
+      }
     }
 
     if (dto.email && dto.email !== user.email) {
@@ -120,7 +140,7 @@ export class UsersService {
       if (existing && String(existing.id) !== String(id)) {
         throw new BadRequestException({
           code: 'ERR_EMAIL_TAKEN',
-          message: 'Email already registered'
+          message: 'Email already registered',
         });
       }
     }
@@ -129,7 +149,8 @@ export class UsersService {
     if (dto.displayName !== undefined) updates.displayName = dto.displayName;
     if (dto.email !== undefined) updates.email = dto.email;
     if (dto.role !== undefined) updates.role = dto.role;
-    if (dto.blocked !== undefined) updates.blockedAt = dto.blocked ? new Date() : null;
+    if (dto.blocked !== undefined)
+      updates.blockedAt = dto.blocked ? new Date() : null;
 
     if (Object.keys(updates).length) {
       await this.repo.update({ id }, updates);
@@ -144,7 +165,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException({
         code: 'ERR_USER_NOT_FOUND',
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
@@ -153,7 +174,7 @@ export class UsersService {
       if (existing && String(existing.id) !== String(id)) {
         throw new BadRequestException({
           code: 'ERR_EMAIL_TAKEN',
-          message: 'Email already registered'
+          message: 'Email already registered',
         });
       }
     }
@@ -170,12 +191,19 @@ export class UsersService {
     return this.toPublicUser(updated!);
   }
 
-  async deleteAdmin(id: string) {
+  async deleteAdmin(id: string, currentUserId: string) {
+    if (String(id) === String(currentUserId)) {
+      throw new ForbiddenException({
+        code: 'ERR_SELF_DELETE',
+        message: 'You cannot delete your own admin account',
+      });
+    }
+
     const user = await this.repo.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException({
         code: 'ERR_USER_NOT_FOUND',
-        message: 'User not found'
+        message: 'User not found',
       });
     }
     await this.deleteAccountData(id);
@@ -187,26 +215,26 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException({
         code: 'ERR_USER_NOT_FOUND',
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
     const [recipes, comments, ratings, favorites] = await Promise.all([
       this.recipesRepo.find({
         where: { authorId: id },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC' },
       }),
       this.commentsRepo.find({
         where: { userId: id },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC' },
       }),
       this.ratingsRepo.find({
         where: { userId: id },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC' },
       }),
       this.favoritesRepo.find({
         where: { userId: id },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC' },
       }),
     ]);
 
@@ -219,7 +247,7 @@ export class UsersService {
         role: user.role,
         createdAt: user.createdAt,
         privacyAcceptedAt: user.privacyAcceptedAt ?? null,
-        privacyPolicyVersion: user.privacyPolicyVersion ?? null
+        privacyPolicyVersion: user.privacyPolicyVersion ?? null,
       },
       recipes: recipes.map((recipe) => ({
         id: String(recipe.id),
@@ -244,7 +272,7 @@ export class UsersService {
       favorites: favorites.map((favorite) => ({
         recipeId: String(favorite.recipeId),
         createdAt: favorite.createdAt,
-      }))
+      })),
     };
   }
 
@@ -253,7 +281,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException({
         code: 'ERR_USER_NOT_FOUND',
-        message: 'User not found'
+        message: 'User not found',
       });
     }
     await this.deleteAccountData(id);
@@ -267,7 +295,7 @@ export class UsersService {
       displayName: user.displayName,
       role: user.role,
       createdAt: user.createdAt,
-      blockedAt: user.blockedAt ?? null
+      blockedAt: user.blockedAt ?? null,
     };
   }
 
@@ -277,7 +305,7 @@ export class UsersService {
       email: user.email,
       displayName: user.displayName,
       role: user.role,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
   }
 
