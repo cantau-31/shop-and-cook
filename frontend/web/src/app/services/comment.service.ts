@@ -23,7 +23,7 @@ interface CommentApi {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CommentService {
   private readonly baseUrl = environment.apiUrl;
@@ -32,13 +32,17 @@ export class CommentService {
 
   getComments(recipeId: string): Observable<Comment[]> {
     return this.http
-      .get<PaginatedResponse<CommentApi>>(`${this.baseUrl}/recipes/${recipeId}/comments`)
+      .get<
+        PaginatedResponse<CommentApi>
+      >(`${this.baseUrl}/recipes/${recipeId}/comments`)
       .pipe(map((response) => (response.items || []).map(this.mapComment)));
   }
 
   createComment(recipeId: string, message: string): Observable<Comment> {
     return this.http
-      .post<CommentApi>(`${this.baseUrl}/recipes/${recipeId}/comments`, { body: message })
+      .post<CommentApi>(`${this.baseUrl}/recipes/${recipeId}/comments`, {
+        body: message,
+      })
       .pipe(map(this.mapComment));
   }
 
@@ -46,15 +50,28 @@ export class CommentService {
     return this.http.delete<void>(`${this.baseUrl}/comments/${commentId}`);
   }
 
-  getAdminComments(page = 1, limit = 20): Observable<PaginatedResponse<Comment>> {
-    let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
+  adminDeleteComment(commentId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/admin/comments/${commentId}`,
+    );
+  }
+
+  getAdminComments(
+    page = 1,
+    limit = 20,
+  ): Observable<PaginatedResponse<Comment>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
     return this.http
-      .get<PaginatedResponse<CommentApi>>(`${this.baseUrl}/admin/comments`, { params })
+      .get<
+        PaginatedResponse<CommentApi>
+      >(`${this.baseUrl}/admin/comments`, { params })
       .pipe(
         map((response) => ({
           ...response,
-          items: (response.items || []).map(this.mapComment)
-        }))
+          items: (response.items || []).map(this.mapComment),
+        })),
       );
   }
 
@@ -65,6 +82,6 @@ export class CommentService {
     authorName: api.authorName ?? api.user?.displayName ?? 'Utilisateur',
     message: api.body ?? api.message ?? '',
     createdAt: api.createdAt ?? api.created_at ?? new Date().toISOString(),
-    recipeTitle: api.recipeTitle ?? api.recipe?.title
+    recipeTitle: api.recipeTitle ?? api.recipe?.title,
   });
 }

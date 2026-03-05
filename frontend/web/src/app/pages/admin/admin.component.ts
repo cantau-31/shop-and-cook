@@ -11,6 +11,7 @@ import { AdminUser } from '../../models/user.model';
 import { CommentService } from '../../services/comment.service';
 import { RecipeService } from '../../services/recipe.service';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 
 interface AdminComment extends Comment {
   recipeTitle: string;
@@ -25,10 +26,10 @@ interface AdminComment extends Comment {
     RouterLink,
     ReactiveFormsModule,
     LoadingSpinnerComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
   ],
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.scss']
+  styleUrls: ['./admin.component.scss'],
 })
 export class AdminComponent implements OnInit {
   recipes: Recipe[] = [];
@@ -44,22 +45,63 @@ export class AdminComponent implements OnInit {
   editingUser: AdminUser | null = null;
   private confirmAction: (() => void) | null = null;
 
+  adminVerified = false;
+  verifyError: string | null = null;
+  verifySubmitting = false;
+
   constructor(
     private recipeService: RecipeService,
     private commentService: CommentService,
     private userService: UserService,
-    private fb: FormBuilder
+    private authService: AuthService,
+    private fb: FormBuilder,
   ) {}
+
+  get currentUserId(): string {
+    return this.authService.currentUser?.id ?? '';
+  }
+
+  isSelf(user: AdminUser): boolean {
+    return String(user.id) === String(this.currentUserId);
+  }
+
+  adminPasswordForm = this.fb.group({
+    password: ['', [Validators.required, Validators.minLength(8)]],
+  });
 
   userForm = this.fb.group({
     displayName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     role: ['USER', Validators.required],
-    blocked: [false]
+    blocked: [false],
   });
 
   ngOnInit(): void {
-    this.loadData();
+    const stored = sessionStorage.getItem('sc_admin_token');
+    if (stored) {
+      this.adminVerified = true;
+      this.loadData();
+    }
+  }
+
+  verifyAdmin(): void {
+    if (this.adminPasswordForm.invalid) return;
+    this.verifySubmitting = true;
+    this.verifyError = null;
+    const password = this.adminPasswordForm.value.password ?? '';
+    this.authService.verifyAdminPassword(password).subscribe({
+      next: (res) => {
+        sessionStorage.setItem('sc_admin_token', res.adminToken);
+        this.adminVerified = true;
+        this.loadData();
+      },
+      error: () => {
+        this.verifyError = 'Mot de passe incorrect.';
+      },
+      complete: () => {
+        this.verifySubmitting = false;
+      },
+    });
   }
 
   confirmDeleteRecipe(recipe: Recipe): void {
@@ -89,7 +131,7 @@ export class AdminComponent implements OnInit {
       displayName: user.displayName,
       email: user.email,
       role: user.role,
-      blocked: !!user.blockedAt
+      blocked: !!user.blockedAt,
     });
   }
 
@@ -99,7 +141,7 @@ export class AdminComponent implements OnInit {
       displayName: '',
       email: '',
       role: 'USER',
-      blocked: false
+      blocked: false,
     });
   }
 
@@ -114,11 +156,13 @@ export class AdminComponent implements OnInit {
         displayName: payload.displayName ?? '',
         email: payload.email ?? '',
         role: (payload.role ?? 'USER') as 'USER' | 'ADMIN',
-        blocked: !!payload.blocked
+        blocked: !!payload.blocked,
       })
       .subscribe({
         next: (updated) => {
-          this.users = this.users.map((user) => (user.id === updated.id ? updated : user));
+          this.users = this.users.map((user) =>
+            user.id === updated.id ? updated : user,
+          );
           this.feedback = 'Utilisateur mis à jour';
           this.editingUser = null;
         },
@@ -127,7 +171,7 @@ export class AdminComponent implements OnInit {
         },
         complete: () => {
           this.userSubmitting = false;
-        }
+        },
       });
   }
 
@@ -147,7 +191,7 @@ export class AdminComponent implements OnInit {
       next: (response) => {
         const hiddenAt = response.hiddenAt ?? null;
         this.recipes = this.recipes.map((item) =>
-          item.id === recipe.id ? { ...item, hiddenAt } : item
+          item.id === recipe.id ? { ...item, hiddenAt } : item,
         );
         this.feedback = hiddenAt ? 'Recette masquée' : 'Recette restaurée';
       },
@@ -158,15 +202,19 @@ export class AdminComponent implements OnInit {
     this.loading = true;
     this.error = null;
     forkJoin({
-      recipes: this.recipeService.getAdminRecipes({ limit: 50, page: 1, includeHidden: true }),
+      recipes: this.recipeService.getAdminRecipes({
+        limit: 50,
+        page: 1,
+        includeHidden: true,
+      }),
       comments: this.commentService.getAdminComments(1, 50),
-      users: this.userService.getAdminUsers(1, 50)
+      users: this.userService.getAdminUsers(1, 50),
     }).subscribe({
       next: ({ recipes, comments, users }) => {
         this.recipes = recipes.items;
         this.comments = comments.items.map((comment) => ({
           ...comment,
-          recipeTitle: comment.recipeTitle ?? 'Recette'
+          recipeTitle: comment.recipeTitle ?? 'Recette',
         }));
         this.users = users.items;
       },
@@ -180,20 +228,22 @@ export class AdminComponent implements OnInit {
   }
 
   private executeDeleteRecipe(recipeId: string): void {
-    this.recipeService.deleteRecipe(recipeId).subscribe({
+    this.recipeService.adminDeleteRecipe(recipeId).subscribe({
       next: () => {
         this.feedback = 'Recette supprimée';
         this.recipes = this.recipes.filter((recipe) => recipe.id !== recipeId);
-      }
+      },
     });
   }
 
   private executeDeleteComment(commentId: string): void {
-    this.commentService.deleteComment(commentId).subscribe({
+    this.commentService.adminDeleteComment(commentId).subscribe({
       next: () => {
         this.feedback = 'Commentaire supprimé';
-        this.comments = this.comments.filter((comment) => comment.id !== commentId);
-      }
+        this.comments = this.comments.filter(
+          (comment) => comment.id !== commentId,
+        );
+      },
     });
   }
 
@@ -205,7 +255,7 @@ export class AdminComponent implements OnInit {
         if (this.editingUser?.id === userId) {
           this.editingUser = null;
         }
-      }
+      },
     });
   }
 

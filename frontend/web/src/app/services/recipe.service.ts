@@ -143,6 +143,10 @@ export class RecipeService {
     return this.http.delete<void>(`${this.baseUrl}/recipes/${id}`);
   }
 
+  adminDeleteRecipe(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/recipes/admin/${id}`);
+  }
+
   toggleRecipeVisibility(
     id: string,
   ): Observable<{ success: boolean; hiddenAt?: string }> {

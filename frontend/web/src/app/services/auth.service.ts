@@ -1,6 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, finalize, map, Observable, shareReplay, tap, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  finalize,
+  map,
+  Observable,
+  shareReplay,
+  tap,
+  throwError,
+} from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { User, UserRole } from '../models/user.model';
@@ -33,7 +41,7 @@ interface AuthResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly tokenKey = 'sc_token';
@@ -62,7 +70,7 @@ export class AuthService {
       .post<AuthResponse>(`${this.baseUrl}/auth/login`, payload)
       .pipe(
         tap((response) => this.persistSession(response)),
-        map((response) => response.user)
+        map((response) => response.user),
       );
   }
 
@@ -71,17 +79,22 @@ export class AuthService {
       .post<AuthResponse>(`${this.baseUrl}/auth/register`, payload)
       .pipe(
         tap((response) => this.persistSession(response)),
-        map((response) => response.user)
+        map((response) => response.user),
       );
   }
 
   requestPasswordReset(email: string): Observable<PasswordResetResponse> {
-    return this.http.post<PasswordResetResponse>(`${this.baseUrl}/auth/forgot-password`, { email });
+    return this.http.post<PasswordResetResponse>(
+      `${this.baseUrl}/auth/forgot-password`,
+      { email },
+    );
   }
 
   resetPassword(payload: ResetPasswordPayload): Observable<void> {
     return this.http
-      .post<{ success: boolean }>(`${this.baseUrl}/auth/reset-password`, payload)
+      .post<{
+        success: boolean;
+      }>(`${this.baseUrl}/auth/reset-password`, payload)
       .pipe(map(() => void 0));
   }
 
@@ -117,6 +130,15 @@ export class AuthService {
     return this.hasRole('ADMIN');
   }
 
+  verifyAdminPassword(
+    password: string,
+  ): Observable<{ success: boolean; adminToken: string }> {
+    return this.http.post<{ success: boolean; adminToken: string }>(
+      `${this.baseUrl}/auth/verify-password`,
+      { password },
+    );
+  }
+
   updateStoredUser(user: User): void {
     this.currentUserSubject.next(user);
     localStorage.setItem(this.userKey, JSON.stringify(user));
@@ -134,16 +156,16 @@ export class AuthService {
           { refreshToken: this.refreshToken },
           {
             headers: {
-              Authorization: `Bearer ${this.refreshToken}`
-            }
-          }
+              Authorization: `Bearer ${this.refreshToken}`,
+            },
+          },
         )
         .pipe(
           tap((response) => this.persistSession(response)),
           finalize(() => {
             this.refreshInFlight$ = undefined;
           }),
-          shareReplay(1)
+          shareReplay(1),
         );
     }
 
