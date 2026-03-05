@@ -26,7 +26,7 @@ export class Rating {
   @Column({ type: 'tinyint', unsigned: true })
   stars!: number;
 
-  @Column({
+  @CreateDateColumn({
     name: 'created_at',
     type: 'datetime',
   })
